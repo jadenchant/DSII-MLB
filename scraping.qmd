@@ -1,5 +1,16 @@
-
+---
+title: "Web scraping MLB Data"
+format:
+  html: default
+editor_options: 
+  chunk_output_type: console
+---
 ```{r}
+#| include: FALSE
 
+library(tidyverse)
+library(stringr)
+library(rvest)
+library(httr)
 ```
 
