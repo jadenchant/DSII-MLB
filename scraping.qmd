@@ -15,19 +15,27 @@ library(httr)
 ```
 
 ```{r}
-url <- "https://www.baseball-reference.com/awards/awards_2022.shtml#AL_MVP_voting_link"
+url <- "https://www.baseball-reference.com/awards/awards_2023.shtml#AL_MVP_voting_link"
 
 robotstxt::paths_allowed(url)
 
 mlb <- read_html(url)
 
-".left .right"
-
-html_nodes(mlb, css = ".left")[2:3] |>
+first_columns <- html_nodes(mlb, css = ".left")[2:3] |>
   html_text()
 
-html_nodes(mlb, css = ".right")[2:29] |>
-  html_text()
+other_columns <- html_nodes(mlb, css = ".right")[2:29] |>
+  html_text() |>
+  str_subset("[^\\s]")
+
+mvp_voting <- tibble(
+  name = first_columns[1],
+  team = first_columns[2],
+  voting_pts = as.numeric(other_columns[1]),
+  first_place = as.numeric(other_columns[2]),
+  share = as.numeric(str_remove(other_columns[3], "%"))
+  
+)
 ```
 
 
