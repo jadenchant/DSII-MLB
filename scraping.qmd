@@ -84,6 +84,9 @@ for (year in c(1911:1914, 1922:2022)) {
   mvp_voting_full <- mvp_voting_full |>
     bind_rows(get_mvp_by_year(year))
 }
+
+# Export to csv
+# Error Code 429 - Too many requests
 ```
 
 
