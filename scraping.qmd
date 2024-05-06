@@ -74,8 +74,6 @@ get_mvp_by_year <- function(year) {
 ```
 
 ```{r}
-mvp_voting_2022 <- get_mvp_by_year(2022)
-
 mvp_voting_2023 <- get_mvp_by_year(2023)
 
 mvp_voting_full <- mvp_voting_2023
@@ -85,11 +83,21 @@ for (year in c(1911:1914, 1922:2022)) {
     bind_rows(get_mvp_by_year(year))
 }
 
+write.csv(mvp_voting_full, "./data/mvp_voting_pt1.csv")
+
 # Export to csv
 # Error Code 429 - Too many requests
 ```
 
 
+```{r}
+for (year in c(1928:2022)) {
+  mvp_voting_full <- mvp_voting_full |>
+    bind_rows(get_mvp_by_year(year))
+}
+
+write.csv(mvp_voting_full, "./data/mvp_voting_pt2.csv")
+```
 
 
 
