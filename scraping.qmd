@@ -15,27 +15,54 @@ library(httr)
 ```
 
 ```{r}
-url <- "https://www.baseball-reference.com/awards/awards_2023.shtml#AL_MVP_voting_link"
+year <- 2023
+
+url <- str_c("https://www.baseball-reference.com/awards/awards_", year, ".shtml#AL_MVP_voting_link")
 
 robotstxt::paths_allowed(url)
 
-mlb <- read_html(url)
+mvp <- read_html(url)
 
-first_columns <- html_nodes(mlb, css = ".left")[2:3] |>
-  html_text()
 
-other_columns <- html_nodes(mlb, css = ".right")[2:29] |>
-  html_text() |>
-  str_subset("[^\\s]")
+mvp_tables <- mvp |>
+  html_table()
 
-mvp_voting <- tibble(
-  name = first_columns[1],
-  team = first_columns[2],
-  voting_pts = as.numeric(other_columns[1]),
-  first_place = as.numeric(other_columns[2]),
-  share = as.numeric(str_remove(other_columns[3], "%"))
-  
-)
+mvp_voting <- mvp_tables[[1]]
+
+mvp_col_names <- c("Rank", "Name", "Team", "Vote_PTS", "First_Place", "Share", "WAR", "BS_G", "AB", "R", "BS_H", "BS_HR", "RBI", "SB", "BS_BB", "BA", "OBP", "SLG", "OPS", "W", "L", "ERA", "WHIP", "PS_G", "GS", "SV", "IP", "PS_H","PS_HR","PS_BB","SO")
+
+mvp_voting <- mvp_voting |>
+  setNames(mvp_col_names) |>
+  select(-Rank) |>
+  slice(2)
 ```
 
+```{r}
+
+```
+
+
+
+
+
+
+
+```{r}
+#| include: false
+
+# first_columns <- html_nodes(mlb, css = ".left")[2:3] |>
+#   html_text()
+
+# other_columns <- html_nodes(mlb, css = ".right")[2:29] |>
+#   html_text() |>
+#   str_subset("[^\\s]")
+
+# mvp_voting <- tibble(
+#   name = first_columns[1],
+#   team = first_columns[2],
+#   voting_pts = as.numeric(other_columns[1]),
+#   first_place = as.numeric(other_columns[2]),
+#   share = as.numeric(str_remove(other_columns[3], "%")),
+# )
+```
 
