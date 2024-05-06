@@ -14,3 +14,20 @@ library(rvest)
 library(httr)
 ```
 
+```{r}
+url <- "https://www.baseball-reference.com/awards/awards_2022.shtml#AL_MVP_voting_link"
+
+robotstxt::paths_allowed(url)
+
+mlb <- read_html(url)
+
+".left .right"
+
+html_nodes(mlb, css = ".left")[2:3] |>
+  html_text()
+
+html_nodes(mlb, css = ".right")[2:29] |>
+  html_text()
+```
+
+
