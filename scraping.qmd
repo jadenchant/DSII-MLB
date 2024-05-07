@@ -15,33 +15,6 @@ library(tidyverse)
 ```
 
 ```{r}
-year <- 2023
-
-url <- str_c("https://www.baseball-reference.com/awards/awards_", year, ".shtml")
-
-robotstxt::paths_allowed(url)
-
-mvp <- read_html(url)
-
-
-mvp_tables <- mvp |>
-  html_table()
-
-mvp_voting <- mvp_tables[[1]]
-
-mvp_col_names <- c("Rank", "Name", "Team", "Vote_PTS", "First_Place", "Share", "WAR", "BS_G", "AB", "R", "BS_H", "BS_HR", "RBI", "SB", "BS_BB", "BA", "OBP", "SLG", "OPS", "W", "L", "ERA", "WHIP", "PS_G", "GS", "SV", "IP", "PS_H", "PS_HR", "PS_BB","SO")
-
-mvp_voting_2023 <- mvp_voting |>
-  setNames(mvp_col_names) |>
-  select(-Rank) |>
-  slice(2) |>
-  mutate(Year = year,
-         Share = str_replace(Share, "%", ""),
-         Share = as.numeric(Share),
-         across(c("Vote_PTS", "First_Place", "WAR", "BS_G", "AB", "R", "BS_H", "BS_HR", "RBI", "SB", "BS_BB", "BA", "OBP", "SLG", "OPS", "W", "L", "ERA", "WHIP", "PS_G", "GS", "SV", "IP", "PS_H", "PS_HR", "PS_BB", "SO"), ~as.numeric(.)))
-```
-
-```{r}
 get_mvp_by_year <- function(year) {
   
   url <- str_c("https://www.baseball-reference.com/awards/awards_", year, ".shtml")
@@ -88,31 +61,12 @@ for (year in c(1911:1914, 1922:2023)) {
 }
 
 mvp_voting_full <- mvp_voting_full |>
-  distinct()
+  distinct(Year, .keep_all = TRUE) |>
+  arrange(Year)
 
 write.csv(mvp_voting_full, "./data/mvp_voting.csv")
 ```
 
-
-```{r}
-for (year in c(1928:2022)) {
-  mvp_voting_full <- mvp_voting_full |>
-    bind_rows(get_mvp_by_year(year))
-}
-
-write.csv(mvp_voting_full, "./data/mvp_voting_pt2.csv")
-```
-
-```{r}
-for (year in c(1958:2022)) {
-  mvp_voting_full <- mvp_voting_full |>
-    bind_rows(get_mvp_by_year(year))
-  
-  Sys.sleep(5)
-}
-
-write.csv(mvp_voting_full, "./data/mvp_voting_pt3.csv")
-```
 
 
 ```{r}
