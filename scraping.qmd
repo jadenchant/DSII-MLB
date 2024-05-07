@@ -50,12 +50,22 @@ get_mvp_by_year <- function(year) {
   
   robotstxt::paths_allowed(url)
   
-  mvp <- read_html(url)
+  mlb_html <- read_html(url)
   
-  mvp_tables <- mvp |>
+  tables <- mlb_html |>
+    html_nodes(css = "table")
+  
+  
+  |>
     html_table()
   
-  mvp_voting <- mvp_tables[[1]]
+  mvp_voting <- tables[[1]]
+  
+  rookie_voting <- tables[[2]]
+  
+  "#AL_ROY_voting td , #AL_ROY_voting .right"
+  
+  ROY <- html_nodes(mlb_html, xpath = "//*[@id = AL_ROY_voting]")
   
   mvp_col_names <- c("Rank", "Name", "Team", "Vote_PTS", "First_Place", "Share", "WAR", "BS_G", "AB", "R", "BS_H", "BS_HR", "RBI", "SB", "BS_BB", "BA", "OBP", "SLG", "OPS", "W", "L", "ERA", "WHIP", "PS_G", "GS", "SV", "IP", "PS_H", "PS_HR", "PS_BB","SO")
   
@@ -104,11 +114,14 @@ for (year in c(1958:2022)) {
   mvp_voting_full <- mvp_voting_full |>
     bind_rows(get_mvp_by_year(year))
   
-  Sys.sleep(1)
+  Sys.sleep(5)
 }
 
 write.csv(mvp_voting_full, "./data/mvp_voting_pt3.csv")
 ```
+
+
+NOT USING ROOKIE OR CY YOUNG
 
 
 
