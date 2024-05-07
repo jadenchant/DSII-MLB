@@ -131,3 +131,69 @@ write.csv(mvp_voting_full, "./data/mvp_voting_pt3.csv")
 # )
 ```
 
+```{r}
+
+library(httr)
+library(rvest)
+library(dplyr)
+
+MVP_DAT<- read_html("https://www.baseball-reference.com/awards/mvp.shtml") |>
+  html_nodes("table") %>%
+  .[[1]] %>%  
+  html_table()
+
+CYA_DAT<- read_html("https://www.baseball-reference.com/awards/cya.shtml") |>
+  html_nodes("table") %>%
+  .[[1]] %>%  
+  html_table()
+
+ROY_DAT<- read_html("https://www.baseball-reference.com/awards/roy.shtml") |>
+  html_nodes("table") %>%
+  .[[1]] %>%  
+  html_table()
+
+
+colnames(MVP_DAT) <- as.character(MVP_DAT[1,])
+colnames(ROY_DAT) <- as.character(ROY_DAT[1,])
+colnames(CYA_DAT) <- as.character(CYA_DAT[1,])
+MVP_DAT<- MVP_DAT|>
+  filter(Year!= "Year")|>
+  filter(Year >= 1911)|>
+  mutate(Pitcher = ifelse(IP > 10, TRUE, FALSE),Year = as.numeric(Year), across(.cols = WAR:SO, .fns = ~as.numeric(as.character(.))) )
+MVP_DAT
+
+ROY_DAT<- ROY_DAT|>
+   filter(Year!= "Year")|>
+  filter(Year >= 1911)|>
+  mutate(Pitcher = ifelse(IP > 10, TRUE, FALSE),Year = as.numeric(Year), across(.cols = WAR:SO, .fns = ~as.numeric(as.character(.))) )
+
+ROY_DAT
+
+
+CYA_DAT<- CYA_DAT
+  
+
+CYA_DAT
+
+
+selected_player<- MVP_DAT[3,]
+
+selected_player
+
+MVP_DAT|>
+  filter(Pitcher== F)|>
+  ggplot(aes(x= SLG))+
+  geom_histogram()+
+  geom_vline(xintercept = selected_player$SLG, col= "red", lwd= 2)
+  
+
+library(ggplot2)
+
+MVP_DAT|>
+  filter(Pitcher== FALSE)|>
+  ggplot(aes(x= Year, y= SLG))+
+  geom_point()+
+  geom_smooth(se=F, color= "blue", method= lm)
+
+```
+
