@@ -8,10 +8,10 @@ editor_options:
 ```{r}
 #| include: FALSE
 
-library(tidyverse)
 library(stringr)
 library(rvest)
 library(httr)
+library(tidyverse)
 ```
 
 ```{r}
@@ -53,19 +53,10 @@ get_mvp_by_year <- function(year) {
   mlb_html <- read_html(url)
   
   tables <- mlb_html |>
-    html_nodes(css = "table")
-  
-  
-  |>
+    html_nodes(css = "table") |>
     html_table()
   
   mvp_voting <- tables[[1]]
-  
-  rookie_voting <- tables[[2]]
-  
-  "#AL_ROY_voting td , #AL_ROY_voting .right"
-  
-  ROY <- html_nodes(mlb_html, xpath = "//*[@id = AL_ROY_voting]")
   
   mvp_col_names <- c("Rank", "Name", "Team", "Vote_PTS", "First_Place", "Share", "WAR", "BS_G", "AB", "R", "BS_H", "BS_HR", "RBI", "SB", "BS_BB", "BA", "OBP", "SLG", "OPS", "W", "L", "ERA", "WHIP", "PS_G", "GS", "SV", "IP", "PS_H", "PS_HR", "PS_BB","SO")
   
@@ -88,15 +79,18 @@ mvp_voting_2023 <- get_mvp_by_year(2023)
 
 mvp_voting_full <- mvp_voting_2023
 
-for (year in c(1911:1914, 1922:2022)) {
+for (year in c(1911:1914, 1922:2023)) {
   mvp_voting_full <- mvp_voting_full |>
     bind_rows(get_mvp_by_year(year))
+  
+  # Need to wait: Error Code 429 - Too many requests
+  Sys.sleep(5)
 }
 
-write.csv(mvp_voting_full, "./data/mvp_voting_pt1.csv")
+mvp_voting_full <- mvp_voting_full |>
+  distinct()
 
-# Export to csv
-# Error Code 429 - Too many requests
+write.csv(mvp_voting_full, "./data/mvp_voting.csv")
 ```
 
 
@@ -121,35 +115,7 @@ write.csv(mvp_voting_full, "./data/mvp_voting_pt3.csv")
 ```
 
 
-NOT USING ROOKIE OR CY YOUNG
-
-
-
 ```{r}
-#| include: false
-
-# first_columns <- html_nodes(mlb, css = ".left")[2:3] |>
-#   html_text()
-
-# other_columns <- html_nodes(mlb, css = ".right")[2:29] |>
-#   html_text() |>
-#   str_subset("[^\\s]")
-
-# mvp_voting <- tibble(
-#   name = first_columns[1],
-#   team = first_columns[2],
-#   voting_pts = as.numeric(other_columns[1]),
-#   first_place = as.numeric(other_columns[2]),
-#   share = as.numeric(str_remove(other_columns[3], "%")),
-# )
-```
-
-```{r}
-
-library(httr)
-library(rvest)
-library(dplyr)
-
 MVP_DAT<- read_html("https://www.baseball-reference.com/awards/mvp.shtml") |>
   html_nodes("table") %>%
   .[[1]] %>%  
