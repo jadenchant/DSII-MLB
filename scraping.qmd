@@ -99,6 +99,16 @@ for (year in c(1928:2022)) {
 write.csv(mvp_voting_full, "./data/mvp_voting_pt2.csv")
 ```
 
+```{r}
+for (year in c(1958:2022)) {
+  mvp_voting_full <- mvp_voting_full |>
+    bind_rows(get_mvp_by_year(year))
+  
+  Sys.sleep(1)
+}
+
+write.csv(mvp_voting_full, "./data/mvp_voting_pt3.csv")
+```
 
 
 
