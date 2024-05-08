@@ -15,7 +15,7 @@ library(tidyverse)
 ```
 
 ```{r}
-get_mvp_by_year <- function(year) {
+get_mvp_by_year <- function(year, hasNL) {
   
   url <- str_c("https://www.baseball-reference.com/awards/awards_", year, ".shtml")
   
@@ -29,21 +29,43 @@ get_mvp_by_year <- function(year) {
     html_nodes(css = "table") |>
     html_table()
   
-  mvp_voting <- tables[[1]]
-  
   mvp_col_names <- c("Rank", "Name", "Team", "Vote_PTS", "First_Place", "Share", "WAR", "BS_G", "AB", "R", "BS_H", "BS_HR", "RBI", "SB", "BS_BB", "BA", "OBP", "SLG", "OPS", "W", "L", "ERA", "WHIP", "PS_G", "GS", "SV", "IP", "PS_H", "PS_HR", "PS_BB","SO")
   
-  mvp_voting <- mvp_voting |>
+  mvp_voting_al <- tables[[1]]
+  
+  mvp_voting_al <- mvp_voting_al |>
     setNames(mvp_col_names) |>
     select(-Rank) |>
     slice(2) |>
     mutate(Year = year,
+           Lg = "AL",
            Share = str_replace(Share, "%", ""),
            Share = as.numeric(Share),
            across(c("Vote_PTS", "First_Place", "WAR", "BS_G", "AB", "R", "BS_H", "BS_HR", "RBI", "SB", "BS_BB", "BA", "OBP", "SLG", "OPS", "W", "L", "ERA", "WHIP", "PS_G", "GS", "SV", "IP", "PS_H", "PS_HR", "PS_BB", "SO"), ~as.numeric(.))) |>
-    select("Year","Name", "Team", "Vote_PTS", "First_Place", "WAR", "BS_G", "AB", "R", "BS_H", "BS_HR", "RBI", "SB", "BS_BB", "BA", "OBP", "SLG", "OPS", "W", "L", "ERA", "WHIP", "PS_G", "GS", "SV", "IP", "PS_H", "PS_HR", "PS_BB", "SO")
+    select("Year","Name", "Lg", "Team", "Vote_PTS", "First_Place", "WAR", "BS_G", "AB", "R", "BS_H", "BS_HR", "RBI", "SB", "BS_BB", "BA", "OBP", "SLG", "OPS", "W", "L", "ERA", "WHIP", "PS_G", "GS", "SV", "IP", "PS_H", "PS_HR", "PS_BB", "SO")
+  
+  if(hasNL) {
+    mvp_voting_nl <- tables[[2]]
+    
+    mvp_voting_nl <- mvp_voting_nl |>
+    setNames(mvp_col_names) |>
+    select(-Rank) |>
+    slice(2) |>
+    mutate(Year = year,
+           Lg = "NL",
+           Share = str_replace(Share, "%", ""),
+           Share = as.numeric(Share),
+           across(c("Vote_PTS", "First_Place", "WAR", "BS_G", "AB", "R", "BS_H", "BS_HR", "RBI", "SB", "BS_BB", "BA", "OBP", "SLG", "OPS", "W", "L", "ERA", "WHIP", "PS_G", "GS", "SV", "IP", "PS_H", "PS_HR", "PS_BB", "SO"), ~as.numeric(.))) |>
+    select("Year","Name", "Lg", "Team", "Vote_PTS", "First_Place", "WAR", "BS_G", "AB", "R", "BS_H", "BS_HR", "RBI", "SB", "BS_BB", "BA", "OBP", "SLG", "OPS", "W", "L", "ERA", "WHIP", "PS_G", "GS", "SV", "IP", "PS_H", "PS_HR", "PS_BB", "SO")
+  
+  
+  mvp_voting <- mvp_voting_al |>
+    add_row(mvp_voting_nl)
   
   mvp_voting
+  } else{
+    mvp_voting_al
+  }
 }
 ```
 
@@ -53,18 +75,29 @@ mvp_voting_2023 <- get_mvp_by_year(2023)
 mvp_voting_full <- mvp_voting_2023
 
 for (year in c(1911:1914, 1922:2023)) {
-  mvp_voting_full <- mvp_voting_full |>
-    bind_rows(get_mvp_by_year(year))
+  
+  if(year == 1922 | year == 1923) {
+    mvp_voting_full <- mvp_voting_full |>
+      bind_rows(get_mvp_by_year(year, FALSE))
+  } else {
+    mvp_voting_full <- mvp_voting_full |>
+      bind_rows(get_mvp_by_year(year, TRUE))
+  }
   
   # Need to wait: Error Code 429 - Too many requests
   Sys.sleep(5)
 }
 
 mvp_voting_full <- mvp_voting_full |>
-  distinct(Year, .keep_all = TRUE) |>
+  distinct(Year, Lg, .keep_all = TRUE) |>
   arrange(Year)
 
 write.csv(mvp_voting_full, "./data/mvp_voting.csv")
+```
+
+
+```{r}
+mvp_voting_full <- read_csv("./data/mvp_voting.csv")
 ```
 
 
@@ -149,4 +182,13 @@ CYA_DAT|>
   ggplot(aes(x= decade, y= ERA))+
   geom_boxplot()
 ```
+
+
+
+```{r}
+mvp_voting_full |>
+  join_by()
+```
+
+
 
