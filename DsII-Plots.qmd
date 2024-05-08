@@ -1,0 +1,62 @@
+---
+title: "Plots"
+format: html
+editor: visual
+---
+
+```{r}
+library(ggplot2)
+```
+
+Charting Ideas
+
+This first chart is a basic scatter plot that charts Year on the X axis and a chosen statistic on the Y axis. The point of this chart is to use the regression curve to display trends in what statistics matter to voters over time. Also using MVP seasons as a micro causem for the larger league this chart can be used to show statistical trends of the league throughout history. Something interesting we may add would be vertical lines which would represent important times in baseball history (The End of the Deadball era 1922, Integration 1947, Dropping of the Mound in 1968, Start of the Steroid Era 1994, Introduction of Statcast 2016).
+
+```{r}
+MVP_DAT|>
+  filter(Pitcher== FALSE)|>
+  ggplot(aes(x= Year, y= SLG))+
+  geom_point()+
+  geom_smooth(se=F, color= "blue")
+
+```
+
+This chart uses the Cy Young Data, but could be used with any of the previous Data sets. This simply splits all of the Cy Young winners into decade. The chart could be reactive in terms of which statistic represents the Y axis. This would give users the ability to analyze how trends in statistics have changed with Cy Young winner by decade.
+
+```{r}
+CYA_DAT|>
+  mutate(Reliver= ifelse(SV>10, 1, 0))|>
+  mutate(decade= str_extract(Year, "^\\d\\d\\d"))|>
+  mutate(
+    decade = case_when(
+      decade=="194"~"40's",
+      decade=="195"~"50's",
+      decade=="196"~"60's",
+      decade=="197"~"70's", 
+      decade=="198" ~"80's",
+      decade== "199"~ "90's",
+      decade=="200" ~ "2000's",
+      decade=="201"~"2010's",
+      decade== "202"~"2020's",
+    ))|>
+   mutate(decade= fct_relevel(factor(decade), "50's", "60's", "70's", "80's", "90's"))|>
+  ggplot(aes(x= decade, y= ERA))+
+  geom_boxplot()
+
+```
+
+A third charting idea would be to use histograms. For this chart a chosen statistic represents the X axis, in this case it is slugging percentage. Then a selected player is chosen from the list of all MVP winners. That selected player's chosen statistic is represented as a red vertical line. This chart uses the histogram style to allow users to pick out an individual players stats and compare their numbers to other MVP winners in past years. There will also
+
+```{r}
+selected_player<- MVP_DAT[198,]
+
+selected_player
+
+MVP_DAT|>
+  filter(Pitcher== F)|>
+  ggplot(aes(x= SLG))+
+  geom_histogram()+
+  geom_vline(xintercept = selected_player$SLG, col= "red", lwd= 1.5)+
+  labs(title = "1925 Roger Peckinpaugh's Slugging PCT Compared to Other MVPs")
+  
+```

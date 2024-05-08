@@ -177,43 +177,9 @@ CYA_DAT<- CYA_DAT|>
 CYA_DAT
 
 
-selected_player<- MVP_DAT[3,]
 
-selected_player
-
-MVP_DAT|>
-  filter(Pitcher== F)|>
-  ggplot(aes(x= SLG))+
-  geom_histogram()+
-  geom_vline(xintercept = selected_player$SLG, col= "red", lwd= 2)
-  
 
 library(ggplot2)
 
-MVP_DAT|>
-  filter(Pitcher== FALSE)|>
-  ggplot(aes(x= Year, y= SLG))+
-  geom_point()+
-  geom_smooth(se=F, color= "blue", method= lm)
-
-
-CYA_DAT|>
-  mutate(Reliver= ifelse(SV>10, 1, 0))|>
-  mutate(decade= str_extract(Year, "^\\d\\d\\d"))|>
-  mutate(
-    decade = case_when(
-      decade=="194"~"40's",
-      decade=="195"~"50's",
-      decade=="196"~"60's",
-      decade=="197"~"70's", 
-      decade=="198" ~"80's",
-      decade== "199"~ "90's",
-      decade=="200" ~ "2000's",
-      decade=="201"~"2010's",
-      decade== "202"~"2020's",
-    ))|>
-   mutate(decade= fct_relevel(factor(decade), "50's", "60's", "70's", "80's", "90's"))|>
-  ggplot(aes(x= decade, y= ERA))+
-  geom_boxplot()
 ```
 
