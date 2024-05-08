@@ -8,41 +8,14 @@ editor_options:
 ```{r}
 #| include: FALSE
 
-library(tidyverse)
 library(stringr)
 library(rvest)
 library(httr)
+library(tidyverse)
 ```
 
 ```{r}
-year <- 2023
-
-url <- str_c("https://www.baseball-reference.com/awards/awards_", year, ".shtml")
-
-robotstxt::paths_allowed(url)
-
-mvp <- read_html(url)
-
-
-mvp_tables <- mvp |>
-  html_table()
-
-mvp_voting <- mvp_tables[[1]]
-
-mvp_col_names <- c("Rank", "Name", "Team", "Vote_PTS", "First_Place", "Share", "WAR", "BS_G", "AB", "R", "BS_H", "BS_HR", "RBI", "SB", "BS_BB", "BA", "OBP", "SLG", "OPS", "W", "L", "ERA", "WHIP", "PS_G", "GS", "SV", "IP", "PS_H", "PS_HR", "PS_BB","SO")
-
-mvp_voting_2023 <- mvp_voting |>
-  setNames(mvp_col_names) |>
-  select(-Rank) |>
-  slice(2) |>
-  mutate(Year = year,
-         Share = str_replace(Share, "%", ""),
-         Share = as.numeric(Share),
-         across(c("Vote_PTS", "First_Place", "WAR", "BS_G", "AB", "R", "BS_H", "BS_HR", "RBI", "SB", "BS_BB", "BA", "OBP", "SLG", "OPS", "W", "L", "ERA", "WHIP", "PS_G", "GS", "SV", "IP", "PS_H", "PS_HR", "PS_BB", "SO"), ~as.numeric(.)))
-```
-
-```{r}
-get_mvp_by_year <- function(year) {
+get_mvp_by_year <- function(year, hasNL) {
   
   url <- str_c("https://www.baseball-reference.com/awards/awards_", year, ".shtml")
   
@@ -50,26 +23,49 @@ get_mvp_by_year <- function(year) {
   
   robotstxt::paths_allowed(url)
   
-  mvp <- read_html(url)
+  mlb_html <- read_html(url)
   
-  mvp_tables <- mvp |>
+  tables <- mlb_html |>
+    html_nodes(css = "table") |>
     html_table()
-  
-  mvp_voting <- mvp_tables[[1]]
   
   mvp_col_names <- c("Rank", "Name", "Team", "Vote_PTS", "First_Place", "Share", "WAR", "BS_G", "AB", "R", "BS_H", "BS_HR", "RBI", "SB", "BS_BB", "BA", "OBP", "SLG", "OPS", "W", "L", "ERA", "WHIP", "PS_G", "GS", "SV", "IP", "PS_H", "PS_HR", "PS_BB","SO")
   
-  mvp_voting <- mvp_voting |>
+  mvp_voting_al <- tables[[1]]
+  
+  mvp_voting_al <- mvp_voting_al |>
     setNames(mvp_col_names) |>
     select(-Rank) |>
     slice(2) |>
     mutate(Year = year,
+           Lg = "AL",
            Share = str_replace(Share, "%", ""),
            Share = as.numeric(Share),
            across(c("Vote_PTS", "First_Place", "WAR", "BS_G", "AB", "R", "BS_H", "BS_HR", "RBI", "SB", "BS_BB", "BA", "OBP", "SLG", "OPS", "W", "L", "ERA", "WHIP", "PS_G", "GS", "SV", "IP", "PS_H", "PS_HR", "PS_BB", "SO"), ~as.numeric(.))) |>
-    select("Year","Name", "Team", "Vote_PTS", "First_Place", "WAR", "BS_G", "AB", "R", "BS_H", "BS_HR", "RBI", "SB", "BS_BB", "BA", "OBP", "SLG", "OPS", "W", "L", "ERA", "WHIP", "PS_G", "GS", "SV", "IP", "PS_H", "PS_HR", "PS_BB", "SO")
+    select("Year","Name", "Lg", "Team", "Vote_PTS", "First_Place", "WAR", "BS_G", "AB", "R", "BS_H", "BS_HR", "RBI", "SB", "BS_BB", "BA", "OBP", "SLG", "OPS", "W", "L", "ERA", "WHIP", "PS_G", "GS", "SV", "IP", "PS_H", "PS_HR", "PS_BB", "SO")
+  
+  if(hasNL) {
+    mvp_voting_nl <- tables[[2]]
+    
+    mvp_voting_nl <- mvp_voting_nl |>
+    setNames(mvp_col_names) |>
+    select(-Rank) |>
+    slice(2) |>
+    mutate(Year = year,
+           Lg = "NL",
+           Share = str_replace(Share, "%", ""),
+           Share = as.numeric(Share),
+           across(c("Vote_PTS", "First_Place", "WAR", "BS_G", "AB", "R", "BS_H", "BS_HR", "RBI", "SB", "BS_BB", "BA", "OBP", "SLG", "OPS", "W", "L", "ERA", "WHIP", "PS_G", "GS", "SV", "IP", "PS_H", "PS_HR", "PS_BB", "SO"), ~as.numeric(.))) |>
+    select("Year","Name", "Lg", "Team", "Vote_PTS", "First_Place", "WAR", "BS_G", "AB", "R", "BS_H", "BS_HR", "RBI", "SB", "BS_BB", "BA", "OBP", "SLG", "OPS", "W", "L", "ERA", "WHIP", "PS_G", "GS", "SV", "IP", "PS_H", "PS_HR", "PS_BB", "SO")
+  
+  
+  mvp_voting <- mvp_voting_al |>
+    add_row(mvp_voting_nl)
   
   mvp_voting
+  } else{
+    mvp_voting_al
+  }
 }
 ```
 
@@ -78,65 +74,35 @@ mvp_voting_2023 <- get_mvp_by_year(2023)
 
 mvp_voting_full <- mvp_voting_2023
 
-for (year in c(1911:1914, 1922:2022)) {
-  mvp_voting_full <- mvp_voting_full |>
-    bind_rows(get_mvp_by_year(year))
-}
-
-write.csv(mvp_voting_full, "./data/mvp_voting_pt1.csv")
-
-# Export to csv
-# Error Code 429 - Too many requests
-```
-
-
-```{r}
-for (year in c(1928:2022)) {
-  mvp_voting_full <- mvp_voting_full |>
-    bind_rows(get_mvp_by_year(year))
-}
-
-write.csv(mvp_voting_full, "./data/mvp_voting_pt2.csv")
-```
-
-```{r}
-for (year in c(1958:2022)) {
-  mvp_voting_full <- mvp_voting_full |>
-    bind_rows(get_mvp_by_year(year))
+for (year in c(1911:1914, 1922:2023)) {
   
-  Sys.sleep(1)
+  if(year == 1922 | year == 1923) {
+    mvp_voting_full <- mvp_voting_full |>
+      bind_rows(get_mvp_by_year(year, FALSE))
+  } else {
+    mvp_voting_full <- mvp_voting_full |>
+      bind_rows(get_mvp_by_year(year, TRUE))
+  }
+  
+  # Need to wait: Error Code 429 - Too many requests
+  Sys.sleep(5)
 }
 
-write.csv(mvp_voting_full, "./data/mvp_voting_pt3.csv")
+mvp_voting_full <- mvp_voting_full |>
+  distinct(Year, Lg, .keep_all = TRUE) |>
+  arrange(Year)
+
+write.csv(mvp_voting_full, "./data/mvp_voting.csv")
+```
+
+
+```{r}
+mvp_voting_full <- read_csv("./data/mvp_voting.csv")
 ```
 
 
 
 ```{r}
-#| include: false
-
-# first_columns <- html_nodes(mlb, css = ".left")[2:3] |>
-#   html_text()
-
-# other_columns <- html_nodes(mlb, css = ".right")[2:29] |>
-#   html_text() |>
-#   str_subset("[^\\s]")
-
-# mvp_voting <- tibble(
-#   name = first_columns[1],
-#   team = first_columns[2],
-#   voting_pts = as.numeric(other_columns[1]),
-#   first_place = as.numeric(other_columns[2]),
-#   share = as.numeric(str_remove(other_columns[3], "%")),
-# )
-```
-
-```{r}
-
-library(httr)
-library(rvest)
-library(dplyr)
-
 MVP_DAT<- read_html("https://www.baseball-reference.com/awards/mvp.shtml") |>
   html_nodes("table") %>%
   .[[1]] %>%  
@@ -182,4 +148,13 @@ CYA_DAT
 library(ggplot2)
 
 ```
+
+
+
+```{r}
+mvp_voting_full |>
+  join_by()
+```
+
+
 
