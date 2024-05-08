@@ -152,8 +152,8 @@ library(ggplot2)
 
 
 ```{r}
-mvp_voting_full |>
-  join_by()
+mvp_mlb <- mvp_voting_full |>
+  inner_join(MVP_DAT, by = join_by(Name, Year, Lg))
 ```
 
 
