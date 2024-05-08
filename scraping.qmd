@@ -141,12 +141,6 @@ CYA_DAT<- CYA_DAT|>
   
 
 CYA_DAT
-
-
-
-
-library(ggplot2)
-
 ```
 
 
@@ -154,6 +148,8 @@ library(ggplot2)
 ```{r}
 mvp_mlb <- mvp_voting_full |>
   inner_join(MVP_DAT, by = join_by(Name, Year, Lg))
+
+write.csv(mvp_mlb, "./data/mvp_mlb.csv")
 ```
 
 
