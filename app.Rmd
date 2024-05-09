@@ -1,0 +1,84 @@
+---
+title: "MLB MVP, ROY, and Cy Young Winners"
+output: 
+  flexdashboard::flex_dashboard:
+    theme: 
+      version: 4
+      bootswatch: lux
+runtime: shiny
+---
+
+```{r global, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+
+mlb_mvp <- read_csv("data/mlb_mvp.csv")
+```
+
+
+MVP
+==========================
+
+Inputs {.sidebar data-width = 100}
+-------------------------
+
+Explain what the award is
+
+```{r, echo=FALSE}
+inputPanel(
+  selectInput("mvp_stat", label = "Statistic",
+              choices = c("SLG", "BSG", "AB", "R"), selected = "SLG"),
+)
+```
+
+
+Column {data-width=300}
+-------------------------
+
+```{r, echo=FALSE}
+
+renderPlot({
+  mlb_mvp |>
+    filter(Pitcher== FALSE)|>
+    ggplot(aes(x= Year, y= case_when(
+      input$mvp_stat == "SLG" ~ SLG,
+      input$mvp_stat == "BSG" ~ BSG,
+      input$mvp_stat == "AB" ~ AB,
+      input$mvp_stat == "R" ~ R,
+      )))+
+    geom_point()+
+    geom_smooth(se=F, color= "blue")
+})
+
+
+```
+
+
+
+
+ROY
+==========================
+
+Column {data-width = 200}
+-------------------------
+
+Explain what the award is
+
+
+
+
+Cy Young
+==========================
+
+Column {data-width = 200}
+-------------------------
+
+Explain what the award is
+
+
+
+
+
+
+
+

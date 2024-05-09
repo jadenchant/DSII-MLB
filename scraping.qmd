@@ -146,12 +146,12 @@ CYA_DAT
 
 
 ```{r}
-mvp_mlb <- mvp_voting_full |>
+mlb_mvp <- mvp_voting_full |>
   select(-WAR, -RBI, -SB, -BA, -OBP, -SLG, -W, -L, -SV, -IP, -ERA, -SO) |>
   inner_join(MVP_DAT, by = join_by(Name, Year, Lg)) |>
   select(-Voting, -Tm, -...1)
 
-write.csv(mvp_mlb, "./data/mvp_mlb.csv")
+write.csv(mlb_mvp, "./data/mlb_mvp.csv")
 ```
 
 
