@@ -12,14 +12,15 @@ runtime: shiny
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 
-mlb_mvp <- read_csv("data/mlb_mvp.csv")
+mlb_mvp <- read_csv("data/mlb_mvp.csv") |>
+  select(-...1)
 ```
 
 
 MVP
 ==========================
 
-Inputs {.sidebar data-width = 100}
+Inputs {.sidebar}
 -------------------------
 
 Explain what the award is
@@ -27,7 +28,7 @@ Explain what the award is
 ```{r, echo=FALSE}
 inputPanel(
   selectInput("mvp_stat", label = "Statistic",
-              choices = c("SLG", "BSG", "AB", "R"), selected = "SLG"),
+              choices = c("SLG", "AB", "R", "Vote_PTS", "BS_G", "BS_H", "BS_HR", "BS_BB", "OPS", "WAR", "BA", "OBP", "RBI", "SB"), selected = "SLG")
 )
 ```
 
@@ -37,19 +38,46 @@ Column {data-width=300}
 
 ```{r, echo=FALSE}
 
+
 renderPlot({
+  stat_name <- switch(input$mvp_stat,
+                      "SLG" = "SLG",
+                      "AB" = "AB",
+                      "R" = "R",
+                      "Vote_PTS" = "Vote_PTS",
+                      "BS_G" = "BS_G",
+                      "BS_H" = "BS_H",
+                      "BS_HR" = "BS_HR",
+                      "BS_BB" = "BS_BB",
+                      "OPS" = "OPS",
+                      "WAR" = "WAR",
+                      "BA" = "BA",
+                      "OBP" = "OBP",
+                      "RBI" = "RBI",
+                      "SB" = "SB")
+  
   mlb_mvp |>
-    filter(Pitcher== FALSE)|>
-    ggplot(aes(x= Year, y= case_when(
+    filter(Pitcher == FALSE) |>
+    ggplot(aes(x = Year, y = as.numeric(case_when(
       input$mvp_stat == "SLG" ~ SLG,
-      input$mvp_stat == "BSG" ~ BSG,
       input$mvp_stat == "AB" ~ AB,
       input$mvp_stat == "R" ~ R,
-      )))+
-    geom_point()+
-    geom_smooth(se=F, color= "blue")
+      input$mvp_stat == "Vote_PTS" ~ Vote_PTS,
+      input$mvp_stat == "BS_G" ~ BS_G,
+      input$mvp_stat == "BS_H" ~ BS_H,
+      input$mvp_stat == "BS_HR" ~ BS_HR,
+      input$mvp_stat == "BS_BB" ~ BS_BB,
+      input$mvp_stat == "OPS" ~ OPS,
+      input$mvp_stat == "WAR" ~ WAR,
+      input$mvp_stat == "BA" ~ BA,
+      input$mvp_stat == "OBP" ~ OBP,
+      input$mvp_stat == "RBI" ~ RBI,
+      input$mvp_stat == "SB" ~ SB,
+    )))) +
+    geom_point() +
+    geom_smooth(se = FALSE, color = "blue") +
+    labs(y = stat_name)
 })
-
 
 ```
 
