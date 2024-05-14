@@ -137,7 +137,10 @@ renderPlotly({
   #   geom_smooth(se = FALSE, color = "blue") +
   #   labs(y = input$mvp_stat)
 })
+```
+\
 
+```{r, echo=FALSE}
 renderPlotly({
   req(input$mvp_stat)
   
