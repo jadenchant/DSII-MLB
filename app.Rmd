@@ -28,7 +28,7 @@ Explain what the award is
 ```{r, echo=FALSE}
 inputPanel(
   selectInput("mvp_stat", label = "Statistic",
-              choices = c("Wins Above Replacement", "Games Played", "At Bats", "Runs Scored", "Hits", "Home Runs", "Runs Batted In", "Bases on Balls", "On Base and Slugging %", "Hits At Bats", "OBP", "Stolen Bases", "Total Bases", "Vote PTS"), selected = "Total Bases")
+              choices = c("Wins Above Replacement", "Games Played", "At Bats", "Runs Scored", "Hits", "Home Runs", "Runs Batted In", "Stolen Bases", "Bases on Balls", "Hits At Bats", "OBP", "On Base and Slugging %", "Total Bases", "Vote PTS"), selected = "Total Bases")
 )
 ```
 
