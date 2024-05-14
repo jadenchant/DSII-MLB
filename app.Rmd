@@ -14,6 +14,15 @@ library(tidyverse)
 
 mlb_mvp <- read_csv("data/mlb_mvp.csv") |>
   select(-...1)
+
+stat_choices <- function(onlyPitchers) {
+  if (onlyPitchers == "Yes") {
+    return(c("Wins Above Replacement", "Games Played", "At Bats", "Runs Scored", "Hits", "Home Runs", "Runs Batted In", "Stolen Bases", "Bases on Balls", "Hits At Bats", "OBP", "On Base and Slugging %", "Total Bases", "Vote PTS", 
+             "Wins", "Losses", "ERA", "WHIP", "Games Pitched", "Games Started Pitched", "Saves", "Innings Pitched", "Hits Allowed", "Home Runs Allowed", "Base on Balls Allowed", "Strike Outs"))
+  } else {
+    return(c("Wins Above Replacement", "Games Played", "At Bats", "Runs Scored", "Hits", "Home Runs", "Runs Batted In", "Stolen Bases", "Bases on Balls", "Hits At Bats", "OBP", "On Base and Slugging %", "Total Bases", "Vote PTS"))
+  }
+}
 ```
 
 
@@ -27,9 +36,19 @@ Explain what the award is
 
 ```{r, echo=FALSE}
 inputPanel(
-  selectInput("mvp_stat", label = "Statistic",
-              choices = c("Wins Above Replacement", "Games Played", "At Bats", "Runs Scored", "Hits", "Home Runs", "Runs Batted In", "Stolen Bases", "Bases on Balls", "Hits At Bats", "OBP", "On Base and Slugging %", "Total Bases", "Vote PTS"), selected = "Total Bases")
+  radioButtons(
+    "onlyPitchers",
+    label = "Only Pitchers",
+    choices = c("Yes", "No"),
+    selected = "No"
+  ),
+  uiOutput("stat_selector")
 )
+
+output$stat_selector <- renderUI({
+  selectInput("mvp_stat", label = "Statistic",
+              choices = stat_choices(input$onlyPitchers), selected = "Wins Above Replacement")
+})
 ```
 
 
@@ -37,47 +56,50 @@ Column {data-width=300}
 -------------------------
 
 ```{r, echo=FALSE}
-
-
 renderPlot({
-  stat_name <- switch(input$mvp_stat,
-                      "Total Bases" = "Total Bases",
-                      "At Bats" = "At Bats",
-                      "Runs Scored" = "Runs Scored",
-                      "Vote PTS" = "Vote PTS",
-                      "Games Played" = "Games Played",
-                      "Hits" = "Hits",
-                      "Home Runs" = "Home Runs",
-                      "Bases on Balls" = "Bases on Balls",
-                      "On Base and Slugging %" = "On Base and Slugging %",
-                      "Wins Above Replacement" = "Wins Above Replacement",
-                      "Hits At Bats" = "Hits At Bats",
-                      "OBP" = "OBP",
-                      "Runs Batted In" = "Runs Batted In",
-                      "Stolen Bases" = "Stolen Bases")
+  req(input$mvp_stat)
   
-  mlb_mvp |>
-    filter(Pitcher == FALSE) |>
-    ggplot(aes(x = Year, y = as.numeric(case_when(
-      input$mvp_stat == "Total Bases" ~ SLG,
-      input$mvp_stat == "At Bats" ~ AB,
-      input$mvp_stat == "Runs Scored" ~ R,
-      input$mvp_stat == "Vote PTS" ~ Vote_PTS,
-      input$mvp_stat == "Games Played" ~ BS_G,
-      input$mvp_stat == "Hits" ~ BS_H,
-      input$mvp_stat == "Home Runs" ~ BS_HR,
-      input$mvp_stat == "Bases on Balls" ~ BS_BB,
-      input$mvp_stat == "On Base and Slugging %" ~ OPS,
-      input$mvp_stat == "Wins Above Replacement" ~ WAR,
-      input$mvp_stat == "Hits At Bats" ~ BA,
-      input$mvp_stat == "OBP" ~ OBP,
-      input$mvp_stat == "Runs Batted In" ~ RBI,
-      input$mvp_stat == "Stolen Bases" ~ SB,
-    )))) +
+  stat_name <- switch(input$mvp_stat,
+                      "Total Bases" = "SLG",
+                      "At Bats" = "AB",
+                      "Runs Scored" = "R",
+                      "Vote PTS" = "Vote_PTS",
+                      "Games Played" = "BS_G",
+                      "Hits" = "BS_H",
+                      "Home Runs" = "BS_HR",
+                      "Bases on Balls" = "BS_BB",
+                      "On Base and Slugging %" = "OPS",
+                      "Wins Above Replacement" = "WAR",
+                      "Hits At Bats" = "BA",
+                      "OBP" = "OBP",
+                      "Runs Batted In" = "RBI",
+                      "Stolen Bases" = "SB",
+                      "Wins" = "W",
+                      "Losses" = "L",
+                      "ERA" = "ERA",
+                      "WHIP" = "WHIP",
+                      "Games Pitched" = "PS_G",
+                      "Games Started Pitched" = "GS",
+                      "Saves" = "SV",
+                      "Innings Pitched" = "IP",
+                      "Hits Allowed" = "PS_H",
+                      "Home Runs Allowed" = "PS_HR",
+                      "Base on Balls Allowed" = "PS_BB",
+                      "Strike Outs" = "SO")
+
+  filtered_data <- if (input$onlyPitchers == "Yes") {
+    mlb_mvp |> filter(Pitcher)
+  } else {
+    mlb_mvp
+  }
+  
+  ggplot(filtered_data, aes(x = Year, y = as.numeric(filtered_data[[stat_name]]))) +
     geom_point() +
     geom_smooth(se = FALSE, color = "blue") +
-    labs(y = stat_name)
+    labs(y = input$mvp_stat)
 })
+
+
 
 ```
 
