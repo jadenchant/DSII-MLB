@@ -15,8 +15,8 @@ library(tidyverse)
 mlb_mvp <- read_csv("data/mlb_mvp.csv") |>
   select(-...1)
 
-stat_choices <- function(onlyPitchers) {
-  if (onlyPitchers == "Yes") {
+stat_choices <- function(only_pitchers) {
+  if (only_pitchers == "Yes") {
     return(c("Wins Above Replacement", "Games Played", "At Bats", "Runs Scored", "Hits", "Home Runs", "Runs Batted In", "Stolen Bases", "Bases on Balls", "Hits At Bats", "OBP", "On Base and Slugging %", "Total Bases", "Vote PTS", 
              "Wins", "Losses", "ERA", "WHIP", "Games Pitched", "Games Started Pitched", "Saves", "Innings Pitched", "Hits Allowed", "Home Runs Allowed", "Base on Balls Allowed", "Strike Outs"))
   } else {
@@ -43,16 +43,18 @@ Inputs {.sidebar}
 inputPanel(
   uiOutput("stat_selector"),
   radioButtons(
-    "onlyPitchers",
+    "only_pitchers",
     label = "Only Pitchers",
     choices = c("Yes", "No"),
     selected = "No"
-  )
+  ),
+  checkboxInput("nl_league", "National League Teams", value = TRUE),
+  checkboxInput("al_league", "American League Teams", value = TRUE)
 )
 
 output$stat_selector <- renderUI({
   selectInput("mvp_stat", label = "Statistic",
-              choices = stat_choices(input$onlyPitchers), selected = isolate(input$mvp_stat))
+              choices = stat_choices(input$only_pitchers), selected = isolate(input$mvp_stat))
 })
 ```
 
@@ -92,13 +94,23 @@ renderPlot({
                       "Base on Balls Allowed" = "PS_BB",
                       "Strike Outs" = "SO")
 
-  filtered_data <- if (input$onlyPitchers == "Yes") {
+  filtered_data <- if (input$only_pitchers == "Yes") {
     mlb_mvp |> filter(Pitcher)
   } else {
     mlb_mvp
   }
   
-  ggplot(filtered_data, aes(x = Year, y = as.numeric(filtered_data[[stat_name]]))) +
+  filtered_data <- if(!input$nl_league & !input$al_league) {
+    filtered_data
+  } else if(!input$nl_league) {
+    filtered_data |> filter(Lg == "AL")
+  } else if(!input$al_league) {
+    filtered_data |> filter(Lg == "NL")
+  } else {
+    filtered_data
+  }
+  
+  ggplot(filtered_data, aes(x = Year, y = as.numeric(.data[[stat_name]]))) +
     geom_point() +
     geom_smooth(se = FALSE, color = "blue") +
     labs(y = input$mvp_stat)
