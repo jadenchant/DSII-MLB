@@ -26,13 +26,18 @@ stat_choices <- function(onlyPitchers) {
 ```
 
 
+About
+==========================
+
+Explaination
+
+
+
 MVP
 ==========================
 
 Inputs {.sidebar}
 -------------------------
-
-Explain what the award is
 
 ```{r, echo=FALSE}
 inputPanel(
@@ -98,9 +103,6 @@ renderPlot({
     geom_smooth(se = FALSE, color = "blue") +
     labs(y = input$mvp_stat)
 })
-
-
-
 ```
 
 
@@ -112,7 +114,7 @@ ROY
 Column {data-width = 200}
 -------------------------
 
-Explain what the award is
+
 
 
 
@@ -123,7 +125,6 @@ Cy Young
 Column {data-width = 200}
 -------------------------
 
-Explain what the award is
 
 
 
