@@ -28,7 +28,7 @@ Explain what the award is
 ```{r, echo=FALSE}
 inputPanel(
   selectInput("mvp_stat", label = "Statistic",
-              choices = c("SLG", "AB", "R", "Vote_PTS", "BS_G", "BS_H", "BS_HR", "BS_BB", "OPS", "WAR", "BA", "OBP", "RBI", "SB"), selected = "SLG")
+              choices = c("Wins Above Replacement", "Games Played", "At Bats", "Runs Scored", "Hits", "Home Runs", "Runs Batted In", "Bases on Balls", "On Base and Slugging %", "Hits At Bats", "OBP", "Stolen Bases", "Total Bases", "Vote PTS"), selected = "Total Bases")
 )
 ```
 
@@ -41,38 +41,38 @@ Column {data-width=300}
 
 renderPlot({
   stat_name <- switch(input$mvp_stat,
-                      "SLG" = "SLG",
-                      "AB" = "AB",
-                      "R" = "R",
-                      "Vote_PTS" = "Vote_PTS",
-                      "BS_G" = "BS_G",
-                      "BS_H" = "BS_H",
-                      "BS_HR" = "BS_HR",
-                      "BS_BB" = "BS_BB",
-                      "OPS" = "OPS",
-                      "WAR" = "WAR",
-                      "BA" = "BA",
+                      "Total Bases" = "Total Bases",
+                      "At Bats" = "At Bats",
+                      "Runs Scored" = "Runs Scored",
+                      "Vote PTS" = "Vote PTS",
+                      "Games Played" = "Games Played",
+                      "Hits" = "Hits",
+                      "Home Runs" = "Home Runs",
+                      "Bases on Balls" = "Bases on Balls",
+                      "On Base and Slugging %" = "On Base and Slugging %",
+                      "Wins Above Replacement" = "Wins Above Replacement",
+                      "Hits At Bats" = "Hits At Bats",
                       "OBP" = "OBP",
-                      "RBI" = "RBI",
-                      "SB" = "SB")
+                      "Runs Batted In" = "Runs Batted In",
+                      "Stolen Bases" = "Stolen Bases")
   
   mlb_mvp |>
     filter(Pitcher == FALSE) |>
     ggplot(aes(x = Year, y = as.numeric(case_when(
-      input$mvp_stat == "SLG" ~ SLG,
-      input$mvp_stat == "AB" ~ AB,
-      input$mvp_stat == "R" ~ R,
-      input$mvp_stat == "Vote_PTS" ~ Vote_PTS,
-      input$mvp_stat == "BS_G" ~ BS_G,
-      input$mvp_stat == "BS_H" ~ BS_H,
-      input$mvp_stat == "BS_HR" ~ BS_HR,
-      input$mvp_stat == "BS_BB" ~ BS_BB,
-      input$mvp_stat == "OPS" ~ OPS,
-      input$mvp_stat == "WAR" ~ WAR,
-      input$mvp_stat == "BA" ~ BA,
+      input$mvp_stat == "Total Bases" ~ SLG,
+      input$mvp_stat == "At Bats" ~ AB,
+      input$mvp_stat == "Runs Scored" ~ R,
+      input$mvp_stat == "Vote PTS" ~ Vote_PTS,
+      input$mvp_stat == "Games Played" ~ BS_G,
+      input$mvp_stat == "Hits" ~ BS_H,
+      input$mvp_stat == "Home Runs" ~ BS_HR,
+      input$mvp_stat == "Bases on Balls" ~ BS_BB,
+      input$mvp_stat == "On Base and Slugging %" ~ OPS,
+      input$mvp_stat == "Wins Above Replacement" ~ WAR,
+      input$mvp_stat == "Hits At Bats" ~ BA,
       input$mvp_stat == "OBP" ~ OBP,
-      input$mvp_stat == "RBI" ~ RBI,
-      input$mvp_stat == "SB" ~ SB,
+      input$mvp_stat == "Runs Batted In" ~ RBI,
+      input$mvp_stat == "Stolen Bases" ~ SB,
     )))) +
     geom_point() +
     geom_smooth(se = FALSE, color = "blue") +
