@@ -11,6 +11,7 @@ runtime: shiny
 ```{r global, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+library(plotly)
 
 mlb_mvp <- read_csv("data/mlb_mvp.csv") |>
   select(-...1)
@@ -64,7 +65,7 @@ Column {data-width=300}
 -------------------------
 
 ```{r, echo=FALSE}
-renderPlot({
+renderPlotly({
   req(input$mvp_stat)
   
   stat_name <- switch(input$mvp_stat,
@@ -111,11 +112,101 @@ renderPlot({
     filtered_data
   }
   
-  ggplot(filtered_data, aes(x = Year, y = as.numeric(.data[[stat_name]]))) +
-    geom_point() +
-    geom_smooth(se = FALSE, color = "blue") +
-    labs(y = input$mvp_stat)
+  plot <- plot_ly(
+    filtered_data, x = ~Year, y = ~.data[[stat_name]],
+    type = 'scatter',
+    mode = 'markers',
+    text = ~paste("Name:", Name, "<br>League:", Lg),
+    hovertemplate = paste(
+      "%{text}<br>",
+      "Year: %{x}<br>",
+    input$mvp_stat, ": %{y}<extra></extra>"
+  )
+  ) |>
+    layout(
+      title = paste("MLB MVP Statistics:", input$mvp_stat),
+      xaxis = list(title = "Year"),
+      yaxis = list(title = input$mvp_stat)
+    ) |>
+    config(displayModeBar = FALSE)
+  
+  plot
+  
+  # ggplot(filtered_data, aes(x = Year, y = as.numeric(.data[[stat_name]]))) +
+  #   geom_point() +
+  #   geom_smooth(se = FALSE, color = "blue") +
+  #   labs(y = input$mvp_stat)
 })
+
+renderPlotly({
+  req(input$mvp_stat)
+  
+  stat_name <- switch(input$mvp_stat,
+                      "Total Bases" = "SLG",
+                      "At Bats" = "AB",
+                      "Runs Scored" = "R",
+                      "Vote PTS" = "Vote_PTS",
+                      "Games Played" = "BS_G",
+                      "Hits" = "BS_H",
+                      "Home Runs" = "BS_HR",
+                      "Bases on Balls" = "BS_BB",
+                      "On Base and Slugging %" = "OPS",
+                      "Wins Above Replacement" = "WAR",
+                      "Hits At Bats" = "BA",
+                      "OBP" = "OBP",
+                      "Runs Batted In" = "RBI",
+                      "Stolen Bases" = "SB",
+                      "Wins" = "W",
+                      "Losses" = "L",
+                      "ERA" = "ERA",
+                      "WHIP" = "WHIP",
+                      "Games Pitched" = "PS_G",
+                      "Games Started Pitched" = "GS",
+                      "Saves" = "SV",
+                      "Innings Pitched" = "IP",
+                      "Hits Allowed" = "PS_H",
+                      "Home Runs Allowed" = "PS_HR",
+                      "Base on Balls Allowed" = "PS_BB",
+                      "Strike Outs" = "SO")
+
+  filtered_data <- if (input$only_pitchers) {
+    mlb_mvp |> filter(Pitcher)
+  } else {
+    mlb_mvp
+  }
+  
+  filtered_data <- if(!input$nl_league & !input$al_league) {
+    filtered_data
+  } else if(!input$nl_league) {
+    filtered_data |> filter(Lg == "AL")
+  } else if(!input$al_league) {
+    filtered_data |> filter(Lg == "NL")
+  } else {
+    filtered_data
+  }
+  
+  plot <- plot_ly(
+    filtered_data, x = ~Vote_PTS, y = ~.data[[stat_name]],
+    type = 'scatter',
+    mode = 'markers',
+    text = ~paste("Name:", Name, "<br>League:", Lg, "<br>Year:", Year),
+    hovertemplate = paste(
+      "%{text}<br>",
+      "Voting Points: %{x}<br>",
+      input$mvp_stat, ": %{y}<extra></extra>"
+    )
+  ) |>
+    layout(
+      title = paste("MLB MVP Voting Points:", input$mvp_stat),
+      xaxis = list(title = "Voting Points"),
+      yaxis = list(title = input$mvp_stat)
+    ) |>
+    config(displayModeBar = FALSE)
+  
+  plot
+})
+
+
 ```
 
 
