@@ -17,10 +17,10 @@ mlb_mvp <- read_csv("data/mlb_mvp.csv") |>
 
 stat_choices <- function(onlyPitchers) {
   if (onlyPitchers == "Yes") {
-    return(c("Wins Above Replacement", "Games Played", "At Bats", "Runs Scored", "Hits", "Home Runs", "Runs Batted In", "Stolen Bases", "Bases on Balls", "Hits At Bats", "OBP", "On Base and Slugging %", "Total Bases", "Vote PTS", 
+    return(c("Wins Above Replacement", "Games Played", "At Bats", "Runs Scored", "Hits", "Home Runs", "Runs Batted In", "Stolen Bases", "Bases on Balls", "Hits At Bats", "On Base Percentage", "On Base and Slugging %", "Total Bases", "Vote PTS", 
              "Wins", "Losses", "ERA", "WHIP", "Games Pitched", "Games Started Pitched", "Saves", "Innings Pitched", "Hits Allowed", "Home Runs Allowed", "Base on Balls Allowed", "Strike Outs"))
   } else {
-    return(c("Wins Above Replacement", "Games Played", "At Bats", "Runs Scored", "Hits", "Home Runs", "Runs Batted In", "Stolen Bases", "Bases on Balls", "Hits At Bats", "OBP", "On Base and Slugging %", "Total Bases", "Vote PTS"))
+    return(c("Wins Above Replacement", "Games Played", "At Bats", "Runs Scored", "Hits", "Home Runs", "Runs Batted In", "Stolen Bases", "Bases on Balls", "Hits At Bats", "On Base Percentage", "On Base and Slugging %", "Total Bases", "Vote PTS"))
   }
 }
 ```
@@ -29,10 +29,11 @@ stat_choices <- function(onlyPitchers) {
 MVP
 ==========================
 
+
 Inputs {.sidebar}
 -------------------------
 
-Explain what the award is
+
 
 ```{r, echo=FALSE}
 inputPanel(
@@ -97,7 +98,11 @@ renderPlot({
   ggplot(filtered_data, aes(x = Year, y = as.numeric(filtered_data[[stat_name]]))) +
     geom_point() +
     geom_smooth(se = FALSE, color = "blue") +
-    labs(y = input$mvp_stat)
+    labs(y = input$mvp_stat)+
+    geom_vline(xintercept= 1947, linetype= "dotted", color= "red", size= 2)+
+    geom_vline(xintercept= 1969, linetype= "dotted", color= "green", size= 2)+
+    geom_vline(xintercept= 1994, linetype= "dotted", color= "orange", size= 2)+
+    geom_vline(xintercept= 1973,linetype = "dotted", color = "pink", size= 2)
 })
 
 
@@ -172,6 +177,7 @@ renderPlot({
 })
 ```
 
+The MVP award or most valuable player is Major League Baseball's way of recognizing the best overall player in each league in each given season.There are a total of 420 voting points dispersed throughout the writers of the BWAA. A large majority of the time the MVP award is given to the "most valuable" hitter, but it is possible for a pitcher to win. These interactive charts hope to give users insight into how statistical trends have shifted among MVP winners over time, showing both how the trajectory of baseball has changed and also what the voters care about. 
 
 ROY
 ==========================
