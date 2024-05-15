@@ -52,6 +52,7 @@ output$stat_selector <- renderUI({
 ```
 
 
+
 Column {data-width=300}
 -------------------------
 
@@ -70,8 +71,8 @@ renderPlot({
                       "Bases on Balls" = "BS_BB",
                       "On Base and Slugging %" = "OPS",
                       "Wins Above Replacement" = "WAR",
-                      "Hits At Bats" = "BA",
-                      "OBP" = "OBP",
+                      "Batting Average" = "BA",
+                      "On Base Percentage" = "OBP",
                       "Runs Batted In" = "RBI",
                       "Stolen Bases" = "SB",
                       "Wins" = "W",
@@ -104,6 +105,72 @@ renderPlot({
 ```
 
 
+Column {data-width=300}
+-------------------------
+```{r, echo = FALSE}
+renderPlot({
+  req(input$mvp_stat)
+  
+  stat_name <- switch(input$mvp_stat,
+                      "Total Bases" = "SLG",
+                      "At Bats" = "AB",
+                      "Runs Scored" = "R",
+                      "Vote PTS" = "Vote_PTS",
+                      "Games Played" = "BS_G",
+                      "Hits" = "BS_H",
+                      "Home Runs" = "BS_HR",
+                      "Bases on Balls" = "BS_BB",
+                      "On Base and Slugging %" = "OPS",
+                      "Wins Above Replacement" = "WAR",
+                      "Batting Average" = "BA",
+                      "On Base Percentage" = "OBP",
+                      "Runs Batted In" = "RBI",
+                      "Stolen Bases" = "SB",
+                      "Wins" = "W",
+                      "Losses" = "L",
+                      "ERA" = "ERA",
+                      "WHIP" = "WHIP",
+                      "Games Pitched" = "PS_G",
+                      "Games Started Pitched" = "GS",
+                      "Saves" = "SV",
+                      "Innings Pitched" = "IP",
+                      "Hits Allowed" = "PS_H",
+                      "Home Runs Allowed" = "PS_HR",
+                      "Base on Balls Allowed" = "PS_BB",
+                      "Strike Outs" = "SO")
+
+  filtered_data <- if (input$onlyPitchers == "Yes") {
+    mlb_mvp |> filter(Pitcher)
+  } else {
+    mlb_mvp
+  }
+  MVPBoxplot <-filtered_data|>
+  mutate(decade= str_extract(Year, "^\\d\\d\\d"))|>
+  mutate(
+    decade = case_when(
+      decade=="191"~"10's",
+      decade== "192"~"20's",
+      decade=="193"~"30's",
+      decade=="194"~"40's",
+      decade=="195"~"50's",
+      decade=="196"~"60's",
+      decade=="197"~"70's", 
+      decade=="198" ~"80's",
+      decade== "199"~ "90's",
+      decade=="200" ~ "2000's",
+      decade=="201"~"2010's",
+      decade== "202"~"2020's",
+    ))|>
+   mutate(decade= fct_relevel(factor(decade),"10's","20's","30's","40's","50's", "60's", "70's", "80's", "90's"))
+  
+  
+  ggplot(MVPBoxplot, aes(x= decade, y = as.numeric(filtered_data[[stat_name]])))+
+  geom_boxplot()+
+  labs(x = "Decade", y = input$mvp_stat)
+  
+  
+})
+```
 
 
 ROY
