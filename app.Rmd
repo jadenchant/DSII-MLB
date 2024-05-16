@@ -50,12 +50,6 @@ Inputs {.sidebar}
 ```{r, echo=FALSE}
 inputPanel(
   uiOutput("stat_selector"),
-  # radioButtons(
-  #   "only_pitchers",
-  #   label = "Only Pitchers",
-  #   choices = c("Yes", "No"),
-  #   selected = "No"
-  # ),
   checkboxInput("nl_league", "National League Teams", value = TRUE),
   checkboxInput("al_league", "American League Teams", value = TRUE),
   checkboxInput("only_pitchers", "Only Pitchers", value = FALSE)
