@@ -125,13 +125,14 @@ renderPlotly({
     input$mvp_stat, ": %{y}<extra></extra>"
   )
   ) |>
-     add_trace(
-      type = 'scatter',
-      mode = 'lines',
-      y = ~fitted(loess(.data[[stat_name]] ~ Year, data = filtered_data)),
-      line = list(color = 'blue'),
-      text = "Regression"
-    ) |>
+  #    add_trace(
+  #     type = 'scatter',
+  #     mode = 'lines',
+  #     y = ~fitted(loess(.data[[stat_name]] ~ Year, data = filtered_data)),
+  #     line = list(color = 'blue'),
+  #     text = "Regression"
+  #   ) 
+  # |>
     add_trace(
       x = c(1947, 1947),
       y = c(min(filtered_data[[stat_name]], na.rm = TRUE), max(filtered_data[[stat_name]], na.rm = TRUE)),
@@ -201,13 +202,6 @@ renderPlotly({
     config(displayModeBar = FALSE)
   
   plot
-  
-  # ggplot(filtered_data, aes(x = Year, y = as.numeric(.data[[stat_name]]))) +
-  #   geom_point() +
-  #   geom_smooth(se = FALSE, color = "blue") +
-  #   labs(y = input$mvp_stat)+
-  
-
 })
 ```
 
@@ -279,8 +273,6 @@ renderPlotly({
   
   plot
 })
-
-
 ```
 
 
@@ -383,8 +375,8 @@ Column {data-width = 200}
 
 
 
-
-
+Conclusion
+==========================
 
 
 
