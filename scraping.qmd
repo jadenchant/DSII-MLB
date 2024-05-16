@@ -12,6 +12,7 @@ library(stringr)
 library(rvest)
 library(httr)
 library(tidyverse)
+library(dplyr)
 ```
 
 ```{r}
@@ -137,7 +138,8 @@ ROY_DAT
 
 CYA_DAT<- CYA_DAT|>
   mutate(Year= as.numeric(Year), across(.cols = WAR:SO, .fns = ~as.numeric(as.character(.))))|>
-  filter(Year>1900)
+  filter(Year>1900)|>
+  mutate(Reliver= ifelse(SV>10, 1, 0))
   
 
 CYA_DAT

@@ -11,20 +11,32 @@ runtime: shiny
 ```{r global, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+library(plotly)
 
 mlb_mvp <- read_csv("data/mlb_mvp.csv") |>
   select(-...1)
 
+
 stat_choices <- function(onlyPitchers) {
   if (onlyPitchers == "Yes") {
-    return(c("Wins Above Replacement", "Games Played", "At Bats", "Runs Scored", "Hits", "Home Runs", "Runs Batted In", "Stolen Bases", "Bases on Balls", "Hits At Bats", "On Base Percentage", "On Base and Slugging %", "Total Bases", "Vote PTS", 
+    return(c("Wins Above Replacement", "Games Played", "At Bats", "Runs Scored", "Hits", "Home Runs", "Runs Batted In", "Stolen Bases", "Bases on Balls", "Batting Average", "On Base Percentage", "On Base and Slugging %", "Total Bases", "Vote PTS", 
              "Wins", "Losses", "ERA", "WHIP", "Games Pitched", "Games Started Pitched", "Saves", "Innings Pitched", "Hits Allowed", "Home Runs Allowed", "Base on Balls Allowed", "Strike Outs"))
   } else {
-    return(c("Wins Above Replacement", "Games Played", "At Bats", "Runs Scored", "Hits", "Home Runs", "Runs Batted In", "Stolen Bases", "Bases on Balls", "Hits At Bats", "On Base Percentage", "On Base and Slugging %", "Total Bases", "Vote PTS"))
+    return(c("Wins Above Replacement", "Games Played", "At Bats", "Runs Scored", "Hits", "Home Runs", "Runs Batted In", "Stolen Bases", "Bases on Balls", "Batting Average", "On Base Percentage", "On Base and Slugging %", "Total Bases", "Vote PTS"))
   }
 }
 ```
 
+
+About
+==========================
+There are three major awards given out in Major League Baseball each year. The Most Valuable Player Award given to the best player. The Rookie of The Year given to the best first year player, and the Cy Young Award given to the best pitcher. All of these awards are voted on by a council of sports writers labeled the Baseball Writers Association of America, or the BWAA. Each year two players are given each award. One player from the National League, and one player from the American League.     The purpose of this shiny app is to provide an interactive experience for users to view the statistics of these award winners over history. All in an attempt to increase understanding of both how statistical trends have shifted throughout history among the best baseball players, and also how increased importance into statistics over time has altered voting trends, and what writers feel makes up an MVP. Note that definitions of all of our statistics can be found at the bottom of this page.
+
+  The MVP award or most valuable player is Major League Baseball's way of recognizing the best overall player in each league in each given season. A player can be awarded up to 420 voting points from the writers of the BWAA. A large majority of the time the MVP award is given to the "most valuable" hitter, but it is possible for a pitcher to win. Play around with the different leagues, and pitching stats to get the most out of our application. 
+
+  The Rookie of the Year Award is given to recognize Major League Baseball's best first year player in each league. A player can receive up to 150 Vote_PTS in a given year, meaning they won 100% of the first place voting share. This award operates very similarly to the MVP where it is commonplace for a position player to win, but it is possible for a pitcher to get ROTY if they have an amazing season on the mound.
+
+The Cy Young Award is given out to each leagues best overall pitcher. This award can be won by a relief pitcher, but a large majority of the time it is won by a starter. A starting pitcher being the player who starts the game and pitches a large majority of the innings. A player can be awarded up to 210 Voting Points in a season making up 100% of the first place share. Some interesting pieces to our Cy Young charts would be to view the trends of Earned Run Average (ERA), Wins, and Walks (BB). Each of these statistics do a good job of visualizing how pitching has changed in the past century, and what voters care about.  
 
 MVP
 ==========================
@@ -38,17 +50,20 @@ Inputs {.sidebar}
 ```{r, echo=FALSE}
 inputPanel(
   uiOutput("stat_selector"),
-  radioButtons(
-    "onlyPitchers",
-    label = "Only Pitchers",
-    choices = c("Yes", "No"),
-    selected = "No"
-  )
+  # radioButtons(
+  #   "only_pitchers",
+  #   label = "Only Pitchers",
+  #   choices = c("Yes", "No"),
+  #   selected = "No"
+  # ),
+  checkboxInput("nl_league", "National League Teams", value = TRUE),
+  checkboxInput("al_league", "American League Teams", value = TRUE),
+  checkboxInput("only_pitchers", "Only Pitchers", value = FALSE)
 )
 
 output$stat_selector <- renderUI({
   selectInput("mvp_stat", label = "Statistic",
-              choices = stat_choices(input$onlyPitchers), selected = isolate(input$mvp_stat))
+              choices = stat_choices(input$only_pitchers), selected = isolate(input$mvp_stat))
 })
 ```
 
@@ -58,7 +73,7 @@ Column {data-width=300}
 -------------------------
 
 ```{r, echo=FALSE}
-renderPlot({
+renderPlotly({
   req(input$mvp_stat)
   
   stat_name <- switch(input$mvp_stat,
@@ -89,22 +104,187 @@ renderPlot({
                       "Base on Balls Allowed" = "PS_BB",
                       "Strike Outs" = "SO")
 
-  filtered_data <- if (input$onlyPitchers == "Yes") {
+  filtered_data <- if (input$only_pitchers) {
     mlb_mvp |> filter(Pitcher)
   } else {
     mlb_mvp
   }
   
-  ggplot(filtered_data, aes(x = Year, y = as.numeric(filtered_data[[stat_name]]))) +
-    geom_point() +
-    geom_smooth(se = FALSE, color = "blue") +
-    labs(y = input$mvp_stat)+
-    geom_vline(xintercept= 1947, linetype= "dotted", color= "red", size= 2)+
-    geom_vline(xintercept= 1969, linetype= "dotted", color= "green", size= 2)+
-    geom_vline(xintercept= 1994, linetype= "dotted", color= "orange", size= 2)+
-    geom_vline(xintercept= 1973,linetype = "dotted", color = "pink", size= 2)
-})
+  filtered_data <- if(!input$nl_league & !input$al_league) {
+    filtered_data
+  } else if(!input$nl_league) {
+    filtered_data |> filter(Lg == "AL")
+  } else if(!input$al_league) {
+    filtered_data |> filter(Lg == "NL")
+  } else {
+    filtered_data
+  }
+  
+  plot <- plot_ly(
+    filtered_data, x = ~Year, y = ~.data[[stat_name]],
+    type = 'scatter',
+    mode = 'markers',
+    text = ~paste("Name:", Name, "<br>League:", Lg),
+    hovertemplate = paste(
+      "%{text}<br>",
+      "Year: %{x}<br>",
+    input$mvp_stat, ": %{y}<extra></extra>"
+  )
+  ) |>
+     add_trace(
+      type = 'scatter',
+      mode = 'lines',
+      y = ~fitted(loess(.data[[stat_name]] ~ Year, data = filtered_data)),
+      line = list(color = 'blue'),
+      text = "Regression"
+    ) |>
+    add_trace(
+      x = c(1947, 1947),
+      y = c(min(filtered_data[[stat_name]], na.rm = TRUE), max(filtered_data[[stat_name]], na.rm = TRUE)),
+      type = 'scatter',
+      mode = 'lines',
+      line = list(color = "red", dash = "dash"),
+      hoverinfo = 'text',
+      text = "Jackie Robinson Breaks the Color Barrier",
+      showlegend = FALSE
+    )|>
+    add_trace(
+      x = c(1969, 1969),
+      y = c(min(filtered_data[[stat_name]], na.rm = TRUE), max(filtered_data[[stat_name]], na.rm = TRUE)),
+      type = 'scatter',
+      mode = 'lines',
+      line = list(color = "green", dash = "dash"),
+      hoverinfo = 'text',
+      text = "MLB Lowers The Mound Benefiting Hitters",
+      showlegend = FALSE)|>
+    add_trace(
+      x = c(1973, 1973),
+      y = c(min(filtered_data[[stat_name]], na.rm = TRUE), max(filtered_data[[stat_name]], na.rm = TRUE)),
+      type = 'scatter',
+      mode = 'lines',
+      line = list(color = "orange", dash = "dash"),
+      hoverinfo = 'text',
+      text = "Introduction of the DH",
+      showlegend = FALSE)|>
+      add_trace(
+      x = c(1994, 1994),
+      y = c(min(filtered_data[[stat_name]], na.rm = TRUE), max(filtered_data[[stat_name]], na.rm = TRUE)),
+      type = 'scatter',
+      mode = 'lines',
+      line = list(color = "pink", dash = "dash"),
+      hoverinfo = 'text',
+      text = "Steroid Era Begins",
+      showlegend = FALSE)|>
+    add_trace(
+      x = c(2016, 2016),
+      y = c(min(filtered_data[[stat_name]], na.rm = TRUE), max(filtered_data[[stat_name]], na.rm = TRUE)),
+      type = 'scatter',
+      mode = 'lines',
+      line = list(color = "purple", dash = "dash"),
+      hoverinfo = 'text',
+      text = "Statcast System Introduced",
+      showlegend = FALSE)|>
+    layout(
+      title = paste("MLB MVP Statistics:", input$mvp_stat),
+      xaxis = list(title = "Year"),
+      yaxis = list(title = input$mvp_stat),
+      showlegend= F,
+      shapes= list(
+        list(
+          type = "line",
+          x0 = 1947,
+          x1 = 1947,
+          y0 = 0,
+          y1 = 1,
+          xref = "x",
+          yref = "paper",
+          line = list(color = "red", dash = "dash"),
+          name = "MLB lowers the Mound, Benefitting Hitters"
+        )
+      )
+      
+    ) |>
+    config(displayModeBar = FALSE)
+  
+  plot
+  
+  # ggplot(filtered_data, aes(x = Year, y = as.numeric(.data[[stat_name]]))) +
+  #   geom_point() +
+  #   geom_smooth(se = FALSE, color = "blue") +
+  #   labs(y = input$mvp_stat)+
+  
 
+})
+```
+
+```{r, echo=FALSE}
+renderPlotly({
+  req(input$mvp_stat)
+  
+  stat_name <- switch(input$mvp_stat,
+                      "Total Bases" = "SLG",
+                      "At Bats" = "AB",
+                      "Runs Scored" = "R",
+                      "Vote PTS" = "Vote_PTS",
+                      "Games Played" = "BS_G",
+                      "Hits" = "BS_H",
+                      "Home Runs" = "BS_HR",
+                      "Bases on Balls" = "BS_BB",
+                      "On Base and Slugging %" = "OPS",
+                      "Wins Above Replacement" = "WAR",
+                      "Batting Average" = "BA",
+                      "On Base Percentage" = "OBP",
+                      "Runs Batted In" = "RBI",
+                      "Stolen Bases" = "SB",
+                      "Wins" = "W",
+                      "Losses" = "L",
+                      "ERA" = "ERA",
+                      "WHIP" = "WHIP",
+                      "Games Pitched" = "PS_G",
+                      "Games Started Pitched" = "GS",
+                      "Saves" = "SV",
+                      "Innings Pitched" = "IP",
+                      "Hits Allowed" = "PS_H",
+                      "Home Runs Allowed" = "PS_HR",
+                      "Base on Balls Allowed" = "PS_BB",
+                      "Strike Outs" = "SO")
+
+  filtered_data <- if (input$only_pitchers) {
+    mlb_mvp |> filter(Pitcher)
+  } else {
+    mlb_mvp
+  }
+  
+  filtered_data <- if(!input$nl_league & !input$al_league) {
+    filtered_data
+  } else if(!input$nl_league) {
+    filtered_data |> filter(Lg == "AL")
+  } else if(!input$al_league) {
+    filtered_data |> filter(Lg == "NL")
+  } else {
+    filtered_data
+  }
+  
+  plot <- plot_ly(
+    filtered_data, x = ~Vote_PTS, y = ~.data[[stat_name]],
+    type = 'scatter',
+    mode = 'markers',
+    text = ~paste("Name:", Name, "<br>League:", Lg, "<br>Year:", Year),
+    hovertemplate = paste(
+      "%{text}<br>",
+      "Voting Points: %{x}<br>",
+      input$mvp_stat, ": %{y}<extra></extra>"
+    )
+  ) |> 
+    layout(
+      title = paste("MLB MVP Voting Points:", input$mvp_stat),
+      xaxis = list(title = "Voting Points"),
+      yaxis = list(title = input$mvp_stat)
+    ) |>
+    config(displayModeBar = FALSE)
+  
+  plot
+})
 
 
 ```
@@ -114,7 +294,7 @@ Column {data-width=300}
 -------------------------
 ```{r, echo = FALSE}
 renderPlot({
-  req(input$mvp_stat)
+    req(input$mvp_stat)
   
   stat_name <- switch(input$mvp_stat,
                       "Total Bases" = "SLG",
@@ -144,11 +324,22 @@ renderPlot({
                       "Base on Balls Allowed" = "PS_BB",
                       "Strike Outs" = "SO")
 
-  filtered_data <- if (input$onlyPitchers == "Yes") {
+  filtered_data <- if (input$only_pitchers) {
     mlb_mvp |> filter(Pitcher)
   } else {
     mlb_mvp
   }
+  
+  filtered_data <- if(!input$nl_league & !input$al_league) {
+    filtered_data
+  } else if(!input$nl_league) {
+    filtered_data |> filter(Lg == "AL")
+  } else if(!input$al_league) {
+    filtered_data |> filter(Lg == "NL")
+  } else {
+    filtered_data
+  }
+  
   MVPBoxplot <-filtered_data|>
   mutate(decade= str_extract(Year, "^\\d\\d\\d"))|>
   mutate(
@@ -177,7 +368,6 @@ renderPlot({
 })
 ```
 
-The MVP award or most valuable player is Major League Baseball's way of recognizing the best overall player in each league in each given season.There are a total of 420 voting points dispersed throughout the writers of the BWAA. A large majority of the time the MVP award is given to the "most valuable" hitter, but it is possible for a pitcher to win. These interactive charts hope to give users insight into how statistical trends have shifted among MVP winners over time, showing both how the trajectory of baseball has changed and also what the voters care about. 
 
 ROY
 ==========================
@@ -185,7 +375,7 @@ ROY
 Column {data-width = 200}
 -------------------------
 
-Explain what the award is
+
 
 
 
@@ -196,7 +386,6 @@ Cy Young
 Column {data-width = 200}
 -------------------------
 
-Explain what the award is
 
 
 
