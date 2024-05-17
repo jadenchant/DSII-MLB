@@ -16,7 +16,12 @@ library(plotly)
 mlb_mvp <- read_csv("data/mlb_mvp.csv") |>
   select(-...1)
 
-mlb_roy <- read_csv("data/mlb_roy.csv")
+mlb_roy <- read_csv("data/mlb_roy.csv") |>
+  select(-...1)
+
+
+mlb_cya <- read_csv("data/mlb_cya.csv") |>
+  select(-...1)
 
 
 stat_choices <- function(only_pitchers) {
