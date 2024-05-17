@@ -1,5 +1,6 @@
 ---
 title: "MLB MVP, ROY, and Cy Young Winners"
+authors: "Henry Gliedman and Jaden Chant"
 output: 
   flexdashboard::flex_dashboard:
     theme: 
@@ -30,7 +31,7 @@ mlb_cya <- read_csv("data/mlb_cya.csv") |>
 stat_choices_mvp <- function(only_pitchers) {
   if (only_pitchers) {
     return(c("Wins Above Replacement", "Games Played", "At Bats", "Runs Scored", "Hits", "Home Runs", "Runs Batted In", "Stolen Bases", "Bases on Balls", "Batting Average", "On Base Percentage", "On Base and Slugging %", "Slugging Percentage", "Vote PTS", 
-             "Wins", "Losses", "ERA", "WHIP", "Games Pitched", "Games Started Pitched", "Saves", "Innings Pitched", "Hits Allowed", "Home Runs Allowed", "Base on Balls Allowed", "Strike Outs"))
+             "Wins", "Losses", "Earned Run Average", "WHIP", "Games Pitched", "Games Started Pitched", "Saves", "Innings Pitched", "Hits Allowed", "Home Runs Allowed", "Base on Balls Allowed", "Strike Outs"))
   } else {
     return(c("Wins Above Replacement", "Games Played", "At Bats", "Runs Scored", "Hits", "Home Runs", "Runs Batted In", "Stolen Bases", "Bases on Balls", "Batting Average", "On Base Percentage", "On Base and Slugging %", "Slugging Percentage", "Vote PTS"))
   }
@@ -38,14 +39,14 @@ stat_choices_mvp <- function(only_pitchers) {
 
 stat_choices_roy <- function(only_pitchers) {
   if (only_pitchers) {
-    return(c("Wins Above Replacement", "At Bats", "Home Runs", "Runs Batted In", "Stolen Bases", "Batting Average", "On Base Percentage", "Slugging Percentage", 
-             "Wins", "Losses", "ERA", "Saves", "Innings Pitched", "Strike Outs"))
+    return(c("Wins Above Replacement", "Home Runs", "Runs Batted In", "Stolen Bases", "Batting Average", "On Base Percentage", "Slugging Percentage", 
+             "Wins", "Losses", "Earned Run Average", "Saves", "Innings Pitched", "Strike Outs"))
   } else {
-    return(c("Wins Above Replacement", "At Bats", "Home Runs", "Runs Batted In", "Stolen Bases", "Batting Average", "On Base Percentage", "Slugging Percentage"))
+    return(c("Wins Above Replacement", "Home Runs", "Runs Batted In", "Stolen Bases", "Batting Average", "On Base Percentage", "Slugging Percentage"))
   }
 }
 
-cy_young_choices <- c("WAR","Wins","Losses","Saves","ERA","Innings Pitched","Strikeouts")
+cy_young_choices <- c("Wins Above Replacement","Wins","Losses","Saves","Earned Run Average","Innings Pitched","Strikeouts")
 ```
 
 
@@ -109,7 +110,7 @@ renderPlotly({
                       "Stolen Bases" = "SB",
                       "Wins" = "W",
                       "Losses" = "L",
-                      "ERA" = "ERA",
+                      "Earned Run Average" = "ERA",
                       "WHIP" = "WHIP",
                       "Games Pitched" = "PS_G",
                       "Games Started Pitched" = "GS",
@@ -249,7 +250,7 @@ renderPlotly({
                       "Stolen Bases" = "SB",
                       "Wins" = "W",
                       "Losses" = "L",
-                      "ERA" = "ERA",
+                      "Earned Run Average" = "ERA",
                       "WHIP" = "WHIP",
                       "Games Pitched" = "PS_G",
                       "Games Started Pitched" = "GS",
@@ -322,7 +323,7 @@ renderPlot({
                       "Stolen Bases" = "SB",
                       "Wins" = "W",
                       "Losses" = "L",
-                      "ERA" = "ERA",
+                      "Earned Run Average" = "ERA",
                       "WHIP" = "WHIP",
                       "Games Pitched" = "PS_G",
                       "Games Started Pitched" = "GS",
@@ -371,7 +372,8 @@ renderPlot({
   
   ggplot(MVPBoxplot, aes(x= decade, y = as.numeric(filtered_data[[stat_name]])))+
   geom_boxplot()+
-  labs(x = "Decade", y = input$mvp_stat)
+  labs(x = "Decade", y = input$mvp_stat)+
+  ggtitle(paste("MLB MVP Statistics:", input$mvp_stat, "by Decade"))
   
   
 })
@@ -411,8 +413,7 @@ renderPlotly({
 
   stat_name <- switch(input$roy_stat,
                       "Slugging Percentage" = "SLG",
-                      "At Bats" = "AB",
-                      "Home Runs" = "BS_HR",
+                      "Home Runs" = "HR",
                       "Runs Batted In" = "RBI",
                       "Stolen Bases" = "SB",
                       "Batting Average" = "BA",
@@ -420,7 +421,7 @@ renderPlotly({
                       "Wins Above Replacement" = "WAR",
                       "Wins" = "W",
                       "Losses" = "L",
-                      "ERA" = "ERA",
+                      "Earned Run Average" = "ERA",
                       "Saves" = "SV",
                       "Innings Pitched" = "IP",
                       "Strike Outs" = "SO")
@@ -451,7 +452,7 @@ renderPlotly({
     hovertemplate = paste(
       "%{text}<br>",
       "Year: %{x}<br>",
-    input$mvp_stat, ": %{y}<extra></extra>"
+    input$roy_stat, ": %{y}<extra></extra>"
   )
   ) |>
      add_trace(
@@ -508,9 +509,9 @@ renderPlotly({
       text = "Statcast System Introduced",
       showlegend = FALSE)|>
     layout(
-      title = paste("MLB ROY Statistics:", input$mvp_stat),
+      title = paste("MLB ROY Statistics:", input$roy_stat),
       xaxis = list(title = "Year"),
-      yaxis = list(title = input$mvp_stat),
+      yaxis = list(title = input$roy_stat),
       showlegend= F,
       shapes= list(
         list(
@@ -542,8 +543,7 @@ renderPlot({
 
   stat_name <- switch(input$roy_stat,
                       "Slugging Percentage" = "SLG",
-                      "At Bats" = "AB",
-                      "Home Runs" = "BS_HR",
+                      "Home Runs" = "HR",
                       "Runs Batted In" = "RBI",
                       "Stolen Bases" = "SB",
                       "Batting Average" = "BA",
@@ -551,7 +551,7 @@ renderPlot({
                       "Wins Above Replacement" = "WAR",
                       "Wins" = "W",
                       "Losses" = "L",
-                      "ERA" = "ERA",
+                      "Earned Run Average" = "ERA",
                       "Saves" = "SV",
                       "Innings Pitched" = "IP",
                       "Strike Outs" = "SO")
@@ -594,7 +594,8 @@ renderPlot({
   
   ggplot(ROYBoxplot, aes(x= decade, y = as.numeric(filtered_data[[stat_name]])))+
   geom_boxplot()+
-  labs(x = "Decade", y = input$mvp_stat)
+  labs(x = "Decade", y = input$mvp_stat)+
+  ggtitle(paste("MLB ROY Statistics:", input$roy_stat, "by Decade"))
   
 })
 ```
@@ -628,10 +629,10 @@ renderPlotly({
   req(input$cya_stat)
   
   cstat_name <- switch(input$cya_stat,
-                      "WAR"= "WAR",
+                      "Wins Above Replacement"= "WAR",
                       "Wins" = "W",
                       "Losses" = "L",
-                      "ERA" = "ERA",
+                      "Earned Run Average" = "ERA",
                       "Saves" = "SV",
                       "Innings Pitched" = "IP",
                       "Strikeouts" = "SO")
@@ -722,10 +723,10 @@ renderPlot({
     req(input$cya_stat)
   
   cstat_name <- switch(input$cya_stat,
-                      "WAR"= "WAR",
+                      "Wins Above Replacement"= "WAR",
                       "Wins" = "W",
                       "Losses" = "L",
-                      "ERA" = "ERA",
+                      "Earned Run Average" = "ERA",
                       "Saves" = "SV",
                       "Innings Pitched" = "IP",
                       "Strikeouts" = "SO")
@@ -760,7 +761,8 @@ renderPlot({
   
   ggplot(cyaBoxplot, aes(x= decade, y = as.numeric(filtered_data[[cstat_name]])))+
   geom_boxplot()+
-  labs(x = "Decade", y = input$cya_stat)
+  labs(x = "Decade", y = input$cya_stat)+
+  ggtitle(paste("MLB CYA Statistics:", input$cya_stat, "by Decade"))
 })
 ```
 
@@ -771,5 +773,5 @@ renderPlot({
 Conclusion
 ==========================
 
-
+The Rookie of the Year
 
