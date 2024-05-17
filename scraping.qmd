@@ -136,6 +136,11 @@ ROY_DAT<- ROY_DAT|>
 ROY_DAT
 
 write.csv(ROY_DAT, "./data/mlb_roy.csv")
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> c914069cf4b326da9ba8916f6da49b51af76b841
 CYA_DAT<- CYA_DAT|>
   mutate(Year= as.numeric(Year), across(.cols = WAR:SO, .fns = ~as.numeric(as.character(.))))|>
   filter(Year>1900)|>

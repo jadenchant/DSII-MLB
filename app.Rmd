@@ -16,9 +16,12 @@ library(plotly)
 mlb_mvp <- read_csv("data/mlb_mvp.csv") |>
   select(-...1)
 
+
 mlb_cya <- read_csv("data/mlb_cya.csv") |>
   select(-...1)
 
+mlb_roy <- read_csv("data/mlb_roy.csv") |>
+  select(-...1)
 
 stat_choices <- function(onlyPitchers) {
   if (onlyPitchers == "Yes") {
@@ -29,7 +32,7 @@ stat_choices <- function(onlyPitchers) {
   }
 }
 
-cy_young_choices <- c("WAR","Wins","Loses","Saves","ERA","Innings Pitched","Strikeouts")
+cy_young_choices <- c("WAR","Wins","Losses","Saves","ERA","Innings Pitched","Strikeouts")
 ```
 
 
@@ -137,7 +140,7 @@ renderPlotly({
   #     line = list(color = 'blue'),
   #     text = "Regression"
   #   ) 
-  # |>
+  # |
     add_trace(
       x = c(1947, 1947),
       y = c(min(filtered_data[[stat_name]], na.rm = TRUE), max(filtered_data[[stat_name]], na.rm = TRUE)),
@@ -363,9 +366,28 @@ renderPlot({
 ROY
 ==========================
 
-Column {data-width = 200}
+Inputs {.sidebar}
 -------------------------
 
+
+
+```{r, echo=FALSE}
+inputPanel(
+  uiOutput("roy_stat_selector"),
+  checkboxInput("ry_nl_league", "National League Teams", value = TRUE),
+  checkboxInput("ry_al_league", "American League Teams", value = TRUE),
+  checkboxInput("ry_only_pitchers", "Only Pitchers", value = FALSE),
+)
+
+output$stat_selector <- renderUI({
+  selectInput("Roy_stat", label = "Statistic",
+              choices = stat_choices(input$only_pitchers), selected = isolate(input$roy_stat))
+})
+```
+
+
+Column {data-width = 100}
+-------------------------
 
 
 
@@ -373,7 +395,6 @@ Column {data-width = 200}
 
 Cy Young
 ==========================
-
 
 Inputs {.sidebar}
 -------------------------
@@ -390,6 +411,7 @@ output$cy_stat_selector <- renderUI({
               choices = cy_young_choices, selected = isolate(input$cya_stat))
 })
 ```
+
 Column {data-width = 200}
 -------------------------
 
@@ -400,7 +422,7 @@ renderPlotly({
   cstat_name <- switch(input$cya_stat,
                       "WAR"= "WAR",
                       "Wins" = "W",
-                      "Loses" = "L",
+                      "Losses" = "L",
                       "ERA" = "ERA",
                       "Saves" = "SV",
                       "Innings Pitched" = "IP",
@@ -488,7 +510,7 @@ renderPlot({
   cstat_name <- switch(input$cya_stat,
                       "WAR"= "WAR",
                       "Wins" = "W",
-                      "Loses" = "L",
+                      "Losses" = "L",
                       "ERA" = "ERA",
                       "Saves" = "SV",
                       "Innings Pitched" = "IP",
