@@ -59,6 +59,7 @@ There are three major awards given out in Major League Baseball each year. The M
 
 The Cy Young Award is given out to each leagues best overall pitcher. This award can be won by a relief pitcher, but a large majority of the time it is won by a starter. A starting pitcher being the player who starts the game and pitches a large majority of the innings. A player can be awarded up to 210 Voting Points in a season making up 100% of the first place share. Some interesting pieces to our Cy Young charts would be to view the trends of Earned Run Average (ERA), Wins, and Walks (BB). Each of these statistics do a good job of visualizing how pitching has changed in the past century, and what voters care about.  
 
+
 MVP
 ==========================
 
@@ -119,10 +120,12 @@ renderPlotly({
                       "Base on Balls Allowed" = "PS_BB",
                       "Strike Outs" = "SO")
 
+  filtered_data <- mlb_mvp |> filter(!is.na(.data[[stat_name]]))
+  
   filtered_data <- if (input$only_pitchers) {
-    mlb_mvp |> filter(Pitcher)
+    filtered_data |> filter(Pitcher)
   } else {
-    mlb_mvp
+    filtered_data
   }
   
   filtered_data <- if(!input$nl_league & !input$al_league) {
@@ -146,14 +149,13 @@ renderPlotly({
     input$mvp_stat, ": %{y}<extra></extra>"
   )
   ) |>
-  #    add_trace(
-  #     type = 'scatter',
-  #     mode = 'lines',
-  #     y = ~fitted(loess(.data[[stat_name]] ~ Year, data = filtered_data)),
-  #     line = list(color = 'blue'),
-  #     text = "Regression"
-  #   ) 
-  # |
+     add_trace(
+      type = 'scatter',
+      mode = 'lines',
+      y = ~fitted(loess(.data[[stat_name]] ~ Year, data = filtered_data)),
+      line = list(color = 'blue'),
+      text = "Regression"
+    ) |>
     add_trace(
       x = c(1947, 1947),
       y = c(min(filtered_data[[stat_name]], na.rm = TRUE), max(filtered_data[[stat_name]], na.rm = TRUE)),
@@ -423,10 +425,12 @@ renderPlotly({
                       "Innings Pitched" = "IP",
                       "Strike Outs" = "SO")
 
+  filtered_data <- mlb_roy |> filter(!is.na(.data[[stat_name]]))
+  
   filtered_data <- if (input$only_pitchers_roy) {
-    mlb_roy |> filter(Pitcher)
+    filtered_data |> filter(Pitcher)
   } else {
-    mlb_roy
+    filtered_data
   }
 
   filtered_data <- if(!input$nl_league_roy & !input$al_league_roy) {
@@ -450,14 +454,13 @@ renderPlotly({
     input$mvp_stat, ": %{y}<extra></extra>"
   )
   ) |>
-  #    add_trace(
-  #     type = 'scatter',
-  #     mode = 'lines',
-  #     y = ~fitted(loess(.data[[stat_name]] ~ Year, data = filtered_data)),
-  #     line = list(color = 'blue'),
-  #     text = "Regression"
-  #   )
-  # |>
+     add_trace(
+      type = 'scatter',
+      mode = 'lines',
+      y = ~fitted(loess(.data[[stat_name]] ~ Year, data = filtered_data)),
+      line = list(color = 'blue'),
+      text = "Regression"
+    ) |>
     add_trace(
       x = c(1947, 1947),
       y = c(min(filtered_data[[stat_name]], na.rm = TRUE), max(filtered_data[[stat_name]], na.rm = TRUE)),
@@ -598,28 +601,6 @@ renderPlot({
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 Cy Young
 ==========================
 
@@ -655,7 +636,7 @@ renderPlotly({
                       "Innings Pitched" = "IP",
                       "Strikeouts" = "SO")
 
-    filtered_data <- mlb_cya
+  filtered_data <- mlb_cya |> filter(!is.na(.data[[cstat_name]]))
   
   filtered_data <- if(!input$cy_nl_league & !input$cy_al_league) {
     filtered_data
@@ -676,8 +657,14 @@ renderPlotly({
       "%{text}<br>",
       "Year: %{x}<br>",
     input$cya_stat, ": %{y}<extra></extra>"
-  )
-  ) |>
+  )) |>
+     add_trace(
+      type = 'scatter',
+      mode = 'lines',
+      y = ~fitted(loess(.data[[cstat_name]] ~ Year, data = filtered_data)),
+      line = list(color = 'blue'),
+      text = "Regression"
+    ) |>
     add_trace(
       x = c(1969, 1969),
       y = c(min(filtered_data[[cstat_name]], na.rm = TRUE), max(filtered_data[[cstat_name]], na.rm = TRUE)),
@@ -774,8 +761,6 @@ renderPlot({
   ggplot(cyaBoxplot, aes(x= decade, y = as.numeric(filtered_data[[cstat_name]])))+
   geom_boxplot()+
   labs(x = "Decade", y = input$cya_stat)
-  
-  
 })
 ```
 
@@ -785,7 +770,6 @@ renderPlot({
 
 Conclusion
 ==========================
-
 
 
 
