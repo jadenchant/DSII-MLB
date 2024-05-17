@@ -16,15 +16,18 @@ library(plotly)
 mlb_mvp <- read_csv("data/mlb_mvp.csv") |>
   select(-...1)
 
+mlb_cya <- read_csv("data/mlb_cya.csv") |>
+  select(-...1)
 
 stat_choices <- function(onlyPitchers) {
   if (onlyPitchers == "Yes") {
-    return(c("Wins Above Replacement", "Games Played", "At Bats", "Runs Scored", "Hits", "Home Runs", "Runs Batted In", "Stolen Bases", "Bases on Balls", "Batting Average", "On Base Percentage", "On Base and Slugging %", "Total Bases", "Vote PTS", 
-             "Wins", "Losses", "ERA", "WHIP", "Games Pitched", "Games Started Pitched", "Saves", "Innings Pitched", "Hits Allowed", "Home Runs Allowed", "Base on Balls Allowed", "Strike Outs"))
+    return(c("Wins Above Replacement", "Games Played", "At Bats", "Runs Scored", "Hits", "Home Runs", "Runs Batted In", "Stolen Bases", "Bases on Balls", "Batting Average", "On Base Percentage", "On Base and Slugging %", "Total Bases", "Vote PTS", "Wins", "Losses", "ERA", "WHIP", "Games Pitched", "Games Started Pitched", "Saves", "Innings Pitched", "Hits Allowed", "Home Runs Allowed", "Base on Balls Allowed", "Strike Outs"))
   } else {
     return(c("Wins Above Replacement", "Games Played", "At Bats", "Runs Scored", "Hits", "Home Runs", "Runs Batted In", "Stolen Bases", "Bases on Balls", "Batting Average", "On Base Percentage", "On Base and Slugging %", "Total Bases", "Vote PTS"))
   }
 }
+
+cy_young_choices <- c("WAR","Wins","Loses","Saves","ERA","Innings Pitched","Strikeouts")
 ```
 
 
@@ -50,12 +53,6 @@ Inputs {.sidebar}
 ```{r, echo=FALSE}
 inputPanel(
   uiOutput("stat_selector"),
-  # radioButtons(
-  #   "only_pitchers",
-  #   label = "Only Pitchers",
-  #   choices = c("Yes", "No"),
-  #   selected = "No"
-  # ),
   checkboxInput("nl_league", "National League Teams", value = TRUE),
   checkboxInput("al_league", "American League Teams", value = TRUE),
   checkboxInput("only_pitchers", "Only Pitchers", value = FALSE)
@@ -131,13 +128,14 @@ renderPlotly({
     input$mvp_stat, ": %{y}<extra></extra>"
   )
   ) |>
-     add_trace(
-      type = 'scatter',
-      mode = 'lines',
-      y = ~fitted(loess(.data[[stat_name]] ~ Year, data = filtered_data)),
-      line = list(color = 'blue'),
-      text = "Regression"
-    ) |>
+  #    add_trace(
+  #     type = 'scatter',
+  #     mode = 'lines',
+  #     y = ~fitted(loess(.data[[stat_name]] ~ Year, data = filtered_data)),
+  #     line = list(color = 'blue'),
+  #     text = "Regression"
+  #   ) 
+  # |>
     add_trace(
       x = c(1947, 1947),
       y = c(min(filtered_data[[stat_name]], na.rm = TRUE), max(filtered_data[[stat_name]], na.rm = TRUE)),
@@ -207,13 +205,6 @@ renderPlotly({
     config(displayModeBar = FALSE)
   
   plot
-  
-  # ggplot(filtered_data, aes(x = Year, y = as.numeric(.data[[stat_name]]))) +
-  #   geom_point() +
-  #   geom_smooth(se = FALSE, color = "blue") +
-  #   labs(y = input$mvp_stat)+
-  
-
 })
 ```
 
@@ -285,8 +276,6 @@ renderPlotly({
   
   plot
 })
-
-
 ```
 
 
@@ -383,14 +372,164 @@ Column {data-width = 200}
 Cy Young
 ==========================
 
+
+Inputs {.sidebar}
+-------------------------
+```{r, echo=FALSE}
+inputPanel(
+  uiOutput("cy_stat_selector"),
+
+  checkboxInput("cy_nl_league", "National League Teams", value = TRUE),
+  checkboxInput("cy_al_league", "American League Teams", value = TRUE)
+)
+
+output$cy_stat_selector <- renderUI({
+  selectInput("cya_stat", label = "Statistic",
+              choices = cy_young_choices, selected = isolate(input$cya_stat))
+})
+```
 Column {data-width = 200}
 -------------------------
 
+```{r, echo= F}
+renderPlotly({
+  req(input$cya_stat)
+  
+  cstat_name <- switch(input$cya_stat,
+                      "WAR"= "WAR",
+                      "Wins" = "W",
+                      "Loses" = "L",
+                      "ERA" = "ERA",
+                      "Saves" = "SV",
+                      "Innings Pitched" = "IP",
+                      "Strikeouts" = "SO")
+
+    filtered_data <- mlb_cya
+  
+  filtered_data <- if(!input$cy_nl_league & !input$cy_al_league) {
+    filtered_data
+  } else if(!input$cy_nl_league) {
+    filtered_data |> filter(Lg == "AL")
+  } else if(!input$cy_al_league) {
+    filtered_data |> filter(Lg == "NL")
+  } else {
+    filtered_data
+  }
+  
+  plot <- plot_ly(
+    filtered_data, x = ~Year, y = ~.data[[cstat_name]],
+    type = 'scatter',
+    mode = 'markers',
+    text = ~paste("Name:", Name, "<br>League:", Lg),
+    hovertemplate = paste(
+      "%{text}<br>",
+      "Year: %{x}<br>",
+    input$cya_stat, ": %{y}<extra></extra>"
+  )
+  ) |>
+    add_trace(
+      x = c(1969, 1969),
+      y = c(min(filtered_data[[cstat_name]], na.rm = TRUE), max(filtered_data[[cstat_name]], na.rm = TRUE)),
+      type = 'scatter',
+      mode = 'lines',
+      line = list(color = "green", dash = "dash"),
+      hoverinfo = 'text',
+      text = "MLB Lowers The Mound Benefiting Hitters",
+      showlegend = FALSE)|>
+    add_trace(
+      x = c(1973, 1973),
+      y = c(min(filtered_data[[cstat_name]], na.rm = TRUE), max(filtered_data[[cstat_name]], na.rm = TRUE)),
+      type = 'scatter',
+      mode = 'lines',
+      line = list(color = "orange", dash = "dash"),
+      hoverinfo = 'text',
+      text = "Introduction of the DH",
+      showlegend = FALSE)|>
+      add_trace(
+      x = c(1994, 1994),
+      y = c(min(filtered_data[[cstat_name]], na.rm = TRUE), max(filtered_data[[cstat_name]], na.rm = TRUE)),
+      type = 'scatter',
+      mode = 'lines',
+      line = list(color = "pink", dash = "dash"),
+      hoverinfo = 'text',
+      text = "Steroid Era Begins",
+      showlegend = FALSE)|>
+    add_trace(
+      x = c(2016, 2016),
+      y = c(min(filtered_data[[cstat_name]], na.rm = TRUE), max(filtered_data[[cstat_name]], na.rm = TRUE)),
+      type = 'scatter',
+      mode = 'lines',
+      line = list(color = "purple", dash = "dash"),
+      hoverinfo = 'text',
+      text = "Statcast System Introduced",
+      showlegend = FALSE)|>
+    layout(
+      title = paste("MLB Cy Young Statistics:", input$cya_stat),
+      xaxis = list(title = "Year"),
+      yaxis = list(title = input$cya_stat),
+      showlegend= F
+    ) |>
+    config(displayModeBar = FALSE)
+  
+  plot
+})
+
+```
+
+Column {data-width = 200}
+-------------------------
+
+```{r, echo=FALSE}
+renderPlot({
+    req(input$cya_stat)
+  
+  cstat_name <- switch(input$cya_stat,
+                      "WAR"= "WAR",
+                      "Wins" = "W",
+                      "Loses" = "L",
+                      "ERA" = "ERA",
+                      "Saves" = "SV",
+                      "Innings Pitched" = "IP",
+                      "Strikeouts" = "SO")
+
+    filtered_data <- mlb_cya
+  
+  filtered_data <- if(!input$cy_nl_league & !input$cy_al_league) {
+    filtered_data
+  } else if(!input$cy_nl_league) {
+    filtered_data |> filter(Lg == "AL")
+  } else if(!input$cy_al_league) {
+    filtered_data |> filter(Lg == "NL")
+  } else {
+    filtered_data
+  }
+  
+  cyaBoxplot <-filtered_data|>
+  mutate(decade= str_extract(Year, "^\\d\\d\\d"))|>
+  mutate(
+    decade = case_when(
+      decade=="195"~"50's",
+      decade=="196"~"60's",
+      decade=="197"~"70's", 
+      decade=="198" ~"80's",
+      decade== "199"~ "90's",
+      decade=="200" ~ "2000's",
+      decade=="201"~"2010's",
+      decade== "202"~"2020's",
+    ))|>
+   mutate(decade= fct_relevel(factor(decade),"50's", "60's", "70's", "80's", "90's"))
+  
+  
+  ggplot(cyaBoxplot, aes(x= decade, y = as.numeric(filtered_data[[cstat_name]])))+
+  geom_boxplot()+
+  labs(x = "Decade", y = input$cya_stat)
+  
+  
+})
+```
 
 
 
 
-
-
-
-
+Conclusion
+==========================
