@@ -2,10 +2,12 @@
 
 ### Questions
 
-- How do the rookie of the year statistics change over time?
+- How have statistics affected voting rates for MVP winners? 
 
-- How do the MVP statistics change over time?
+- How do the MLB statistics for ROY change over time?
 
-- How do the Rookie of the Year and MVP statcast statistics change over time?
+- How do the MLB statistics for MVP change over time?
+
+- How do the MLB statistics for Cy Young change over time?
 
 
