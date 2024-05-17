@@ -41,7 +41,7 @@ stat_choices_roy <- function(only_pitchers) {
     return(c("Wins Above Replacement", "At Bats", "Home Runs", "Runs Batted In", "Stolen Bases", "Batting Average", "On Base Percentage", "Slugging Percentage", 
              "Wins", "Losses", "ERA", "Saves", "Innings Pitched", "Strike Outs"))
   } else {
-    return(c("Wins Above Replacement", "At Bats", "Home Runs", "Runs Batted In", "Stolen Bases", "Batting Average", "On Base Percentage", "Slugging Percentage"))
+    return(c("Wins Above Replacement", "At Bats", "Home Runs", "Runs Batted In", "Stolen Bases", "Batting Average", "On Base Percentage", "Slugging Percentage", ))
   }
 }
 
@@ -151,15 +151,14 @@ renderPlotly({
     input$mvp_stat, ": %{y}<extra></extra>"
   )
   ) |>
-   add_trace(
-        x = ~Year,
-        y = ~regression_line,
-        type = 'scatter',
-        mode = 'lines',
-        line = list(color = 'blue'),
-        text = "Regression",
-        hoverinfo = 'text'
-      )|>
+  #    add_trace(
+  #     type = 'scatter',
+  #     mode = 'lines',
+  #     y = ~fitted(loess(.data[[stat_name]] ~ Year, data = filtered_data)),
+  #     line = list(color = 'blue'),
+  #     text = "Regression"
+  #   ) 
+  # |
     add_trace(
       x = c(1947, 1947),
       y = c(min(filtered_data[[stat_name]], na.rm = TRUE), max(filtered_data[[stat_name]], na.rm = TRUE)),
@@ -391,237 +390,152 @@ Inputs {.sidebar}
 
 
 ```{r, echo=FALSE}
-inputPanel(
-  uiOutput("stat_selector_roy"),
-  checkboxInput("nl_league_roy", "National League Teams", value = TRUE),
-  checkboxInput("al_league_roy", "American League Teams", value = TRUE),
-  checkboxInput("only_pitchers_roy", "Only Pitchers", value = FALSE)
-)
 
-output$stat_selector_roy <- renderUI({
-  selectInput("roy_stat", label = "Statistic",
-              choices = stat_choices_roy(input$only_pitchers_roy), 
-              selected = isolate(input$roy_stat))
-})
+
+# inputPanel(
+#   uiOutput("stat_selector"),
+#   checkboxInput("nl_league", "National League Teams", value = TRUE),
+#   checkboxInput("al_league", "American League Teams", value = TRUE),
+#   checkboxInput("only_pitchers", "Only Pitchers", value = FALSE),
+# )
+# 
+# output$stat_selector <- renderUI({
+#   selectInput("mvp_stat", label = "Statistic",
+#               choices = stat_choices_mvp(input$only_pitchers), selected = isolate(input$mvp_stat))
+# })
+
 ```
 
 
-Column {data-width = 200}
+Column {data-width = 100}
 -------------------------
 
 ```{r, echo=FALSE}
-renderPlotly({
-  req(input$roy_stat)
-
-  stat_name <- switch(input$roy_stat,
-                      "Slugging Percentage" = "SLG",
-                      "At Bats" = "AB",
-                      "Home Runs" = "BS_HR",
-                      "Runs Batted In" = "RBI",
-                      "Stolen Bases" = "SB",
-                      "Batting Average" = "BA",
-                      "On Base Percentage" = "OBP",
-                      "Wins Above Replacement" = "WAR",
-                      "Wins" = "W",
-                      "Losses" = "L",
-                      "ERA" = "ERA",
-                      "Saves" = "SV",
-                      "Innings Pitched" = "IP",
-                      "Strike Outs" = "SO")
-
-  filtered_data <- if (input$only_pitchers_roy) {
-    mlb_roy |> filter(Pitcher)
-  } else {
-    mlb_roy
-  }
-
-  filtered_data <- if(!input$nl_league_roy & !input$al_league_roy) {
-    filtered_data
-  } else if(!input$nl_league_roy) {
-    filtered_data |> filter(Lg == "AL")
-  } else if(!input$al_league_roy) {
-    filtered_data |> filter(Lg == "NL")
-  } else {
-    filtered_data
-  }
-
-  plot <- plot_ly(
-    filtered_data, x = ~Year, y = ~.data[[stat_name]],
-    type = 'scatter',
-    mode = 'markers',
-    text = ~paste("Name:", Name, "<br>League:", Lg),
-    hovertemplate = paste(
-      "%{text}<br>",
-      "Year: %{x}<br>",
-    input$mvp_stat, ": %{y}<extra></extra>"
-  )
-  ) |>
-  #    add_trace(
-  #     type = 'scatter',
-  #     mode = 'lines',
-  #     y = ~fitted(loess(.data[[stat_name]] ~ Year, data = filtered_data)),
-  #     line = list(color = 'blue'),
-  #     text = "Regression"
-  #   )
-  # |>
-    add_trace(
-      x = c(1947, 1947),
-      y = c(min(filtered_data[[stat_name]], na.rm = TRUE), max(filtered_data[[stat_name]], na.rm = TRUE)),
-      type = 'scatter',
-      mode = 'lines',
-      line = list(color = "red", dash = "dash"),
-      hoverinfo = 'text',
-      text = "Jackie Robinson Breaks the Color Barrier",
-      showlegend = FALSE
-    )|>
-    add_trace(
-      x = c(1969, 1969),
-      y = c(min(filtered_data[[stat_name]], na.rm = TRUE), max(filtered_data[[stat_name]], na.rm = TRUE)),
-      type = 'scatter',
-      mode = 'lines',
-      line = list(color = "green", dash = "dash"),
-      hoverinfo = 'text',
-      text = "MLB Lowers The Mound Benefiting Hitters",
-      showlegend = FALSE)|>
-    add_trace(
-      x = c(1973, 1973),
-      y = c(min(filtered_data[[stat_name]], na.rm = TRUE), max(filtered_data[[stat_name]], na.rm = TRUE)),
-      type = 'scatter',
-      mode = 'lines',
-      line = list(color = "orange", dash = "dash"),
-      hoverinfo = 'text',
-      text = "Introduction of the DH",
-      showlegend = FALSE)|>
-      add_trace(
-      x = c(1994, 1994),
-      y = c(min(filtered_data[[stat_name]], na.rm = TRUE), max(filtered_data[[stat_name]], na.rm = TRUE)),
-      type = 'scatter',
-      mode = 'lines',
-      line = list(color = "pink", dash = "dash"),
-      hoverinfo = 'text',
-      text = "Steroid Era Begins",
-      showlegend = FALSE)|>
-    add_trace(
-      x = c(2016, 2016),
-      y = c(min(filtered_data[[stat_name]], na.rm = TRUE), max(filtered_data[[stat_name]], na.rm = TRUE)),
-      type = 'scatter',
-      mode = 'lines',
-      line = list(color = "purple", dash = "dash"),
-      hoverinfo = 'text',
-      text = "Statcast System Introduced",
-      showlegend = FALSE)|>
-    layout(
-      title = paste("MLB ROY Statistics:", input$mvp_stat),
-      xaxis = list(title = "Year"),
-      yaxis = list(title = input$mvp_stat),
-      showlegend= F,
-      shapes= list(
-        list(
-          type = "line",
-          x0 = 1947,
-          x1 = 1947,
-          y0 = 0,
-          y1 = 1,
-          xref = "x",
-          yref = "paper",
-          line = list(color = "red", dash = "dash"),
-          name = "MLB lowers the Mound, Benefitting Hitters"
-        )
-      )
-
-    ) |>
-    config(displayModeBar = FALSE)
-
-  plot
-})
+# renderPlotly({
+#   req(input$mvp_stat)
+#   
+#   stat_name <- switch(input$mvp_stat,
+#                       "Slugging Percentage" = "SLG",
+#                       "At Bats" = "AB",
+#                       "Home Runs" = "BS_HR",
+#                       "Runs Batted In" = "RBI",
+#                       "Stolen Bases" = "SB",
+#                       "Batting Average" = "BA",
+#                       "On Base Percentage" = "OBP",
+#                       "Wins Above Replacement" = "WAR",
+#                       "Wins" = "W",
+#                       "Losses" = "L",
+#                       "ERA" = "ERA",
+#                       "Saves" = "SV",
+#                       "Innings Pitched" = "IP",
+#                       "Strike Outs" = "SO")
+# 
+#   filtered_data <- if (input$only_pitchers) {
+#     mlb_mvp |> filter(Pitcher)
+#   } else {
+#     mlb_mvp
+#   }
+#   
+#   filtered_data <- if(!input$nl_league & !input$al_league) {
+#     filtered_data
+#   } else if(!input$nl_league) {
+#     filtered_data |> filter(Lg == "AL")
+#   } else if(!input$al_league) {
+#     filtered_data |> filter(Lg == "NL")
+#   } else {
+#     filtered_data
+#   }
+#   
+#   plot <- plot_ly(
+#     filtered_data, x = ~Year, y = ~.data[[stat_name]],
+#     type = 'scatter',
+#     mode = 'markers',
+#     text = ~paste("Name:", Name, "<br>League:", Lg),
+#     hovertemplate = paste(
+#       "%{text}<br>",
+#       "Year: %{x}<br>",
+#     input$mvp_stat, ": %{y}<extra></extra>"
+#   )
+#   ) |>
+#   #    add_trace(
+#   #     type = 'scatter',
+#   #     mode = 'lines',
+#   #     y = ~fitted(loess(.data[[stat_name]] ~ Year, data = filtered_data)),
+#   #     line = list(color = 'blue'),
+#   #     text = "Regression"
+#   #   ) 
+#   # |>
+#     add_trace(
+#       x = c(1947, 1947),
+#       y = c(min(filtered_data[[stat_name]], na.rm = TRUE), max(filtered_data[[stat_name]], na.rm = TRUE)),
+#       type = 'scatter',
+#       mode = 'lines',
+#       line = list(color = "red", dash = "dash"),
+#       hoverinfo = 'text',
+#       text = "Jackie Robinson Breaks the Color Barrier",
+#       showlegend = FALSE
+#     )|>
+#     add_trace(
+#       x = c(1969, 1969),
+#       y = c(min(filtered_data[[stat_name]], na.rm = TRUE), max(filtered_data[[stat_name]], na.rm = TRUE)),
+#       type = 'scatter',
+#       mode = 'lines',
+#       line = list(color = "green", dash = "dash"),
+#       hoverinfo = 'text',
+#       text = "MLB Lowers The Mound Benefiting Hitters",
+#       showlegend = FALSE)|>
+#     add_trace(
+#       x = c(1973, 1973),
+#       y = c(min(filtered_data[[stat_name]], na.rm = TRUE), max(filtered_data[[stat_name]], na.rm = TRUE)),
+#       type = 'scatter',
+#       mode = 'lines',
+#       line = list(color = "orange", dash = "dash"),
+#       hoverinfo = 'text',
+#       text = "Introduction of the DH",
+#       showlegend = FALSE)|>
+#       add_trace(
+#       x = c(1994, 1994),
+#       y = c(min(filtered_data[[stat_name]], na.rm = TRUE), max(filtered_data[[stat_name]], na.rm = TRUE)),
+#       type = 'scatter',
+#       mode = 'lines',
+#       line = list(color = "pink", dash = "dash"),
+#       hoverinfo = 'text',
+#       text = "Steroid Era Begins",
+#       showlegend = FALSE)|>
+#     add_trace(
+#       x = c(2016, 2016),
+#       y = c(min(filtered_data[[stat_name]], na.rm = TRUE), max(filtered_data[[stat_name]], na.rm = TRUE)),
+#       type = 'scatter',
+#       mode = 'lines',
+#       line = list(color = "purple", dash = "dash"),
+#       hoverinfo = 'text',
+#       text = "Statcast System Introduced",
+#       showlegend = FALSE)|>
+#     layout(
+#       title = paste("MLB MVP Statistics:", input$mvp_stat),
+#       xaxis = list(title = "Year"),
+#       yaxis = list(title = input$mvp_stat),
+#       showlegend= F,
+#       shapes= list(
+#         list(
+#           type = "line",
+#           x0 = 1947,
+#           x1 = 1947,
+#           y0 = 0,
+#           y1 = 1,
+#           xref = "x",
+#           yref = "paper",
+#           line = list(color = "red", dash = "dash"),
+#           name = "MLB lowers the Mound, Benefitting Hitters"
+#         )
+#       )
+#       
+#     ) |>
+#     config(displayModeBar = FALSE)
+#   
+#   plot
+# })
 ```
-
-Column {data-width = 200}
--------------------------
-
-```{r, echo=FALSE}
-renderPlot({
-  req(input$roy_stat)
-
-  stat_name <- switch(input$roy_stat,
-                      "Slugging Percentage" = "SLG",
-                      "At Bats" = "AB",
-                      "Home Runs" = "BS_HR",
-                      "Runs Batted In" = "RBI",
-                      "Stolen Bases" = "SB",
-                      "Batting Average" = "BA",
-                      "On Base Percentage" = "OBP",
-                      "Wins Above Replacement" = "WAR",
-                      "Wins" = "W",
-                      "Losses" = "L",
-                      "ERA" = "ERA",
-                      "Saves" = "SV",
-                      "Innings Pitched" = "IP",
-                      "Strike Outs" = "SO")
-
-  filtered_data <- if (input$only_pitchers_roy) {
-    mlb_roy |> filter(Pitcher)
-  } else {
-    mlb_roy
-  }
-  
-  filtered_data <- if(!input$nl_league_roy & !input$al_league_roy) {
-    filtered_data
-  } else if(!input$nl_league_roy) {
-    filtered_data |> filter(Lg == "AL")
-  } else if(!input$al_league_roy) {
-    filtered_data |> filter(Lg == "NL")
-  } else {
-    filtered_data
-  }
-  
-  ROYBoxplot <-filtered_data|>
-  mutate(decade= str_extract(Year, "^\\d\\d\\d"))|>
-  mutate(
-    decade = case_when(
-      decade=="191"~"10's",
-      decade== "192"~"20's",
-      decade=="193"~"30's",
-      decade=="194"~"40's",
-      decade=="195"~"50's",
-      decade=="196"~"60's",
-      decade=="197"~"70's", 
-      decade=="198" ~"80's",
-      decade== "199"~ "90's",
-      decade=="200" ~ "2000's",
-      decade=="201"~"2010's",
-      decade== "202"~"2020's",
-    ))|>
-   mutate(decade= fct_relevel(factor(decade),"10's","20's","30's","40's","50's", "60's", "70's", "80's", "90's"))
-  
-  
-  ggplot(ROYBoxplot, aes(x= decade, y = as.numeric(filtered_data[[stat_name]])))+
-  geom_boxplot()+
-  labs(x = "Decade", y = input$mvp_stat)
-  
-})
-```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
