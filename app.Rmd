@@ -19,9 +19,11 @@ mlb_mvp <- read_csv("data/mlb_mvp.csv") |>
 mlb_cya <- read_csv("data/mlb_cya.csv") |>
   select(-...1)
 
+
 stat_choices <- function(onlyPitchers) {
   if (onlyPitchers == "Yes") {
     return(c("Wins Above Replacement", "Games Played", "At Bats", "Runs Scored", "Hits", "Home Runs", "Runs Batted In", "Stolen Bases", "Bases on Balls", "Batting Average", "On Base Percentage", "On Base and Slugging %", "Total Bases", "Vote PTS", "Wins", "Losses", "ERA", "WHIP", "Games Pitched", "Games Started Pitched", "Saves", "Innings Pitched", "Hits Allowed", "Home Runs Allowed", "Base on Balls Allowed", "Strike Outs"))
+
   } else {
     return(c("Wins Above Replacement", "Games Played", "At Bats", "Runs Scored", "Hits", "Home Runs", "Runs Batted In", "Stolen Bases", "Bases on Balls", "Batting Average", "On Base Percentage", "On Base and Slugging %", "Total Bases", "Vote PTS"))
   }
@@ -55,7 +57,7 @@ inputPanel(
   uiOutput("stat_selector"),
   checkboxInput("nl_league", "National League Teams", value = TRUE),
   checkboxInput("al_league", "American League Teams", value = TRUE),
-  checkboxInput("only_pitchers", "Only Pitchers", value = FALSE)
+  checkboxInput("only_pitchers", "Only Pitchers", value = FALSE),
 )
 
 output$stat_selector <- renderUI({
@@ -283,7 +285,7 @@ Column {data-width=300}
 -------------------------
 ```{r, echo = FALSE}
 renderPlot({
-    req(input$mvp_stat)
+  req(input$mvp_stat)
   
   stat_name <- switch(input$mvp_stat,
                       "Total Bases" = "SLG",
@@ -531,5 +533,10 @@ renderPlot({
 
 
 
+
 Conclusion
 ==========================
+
+
+
+
