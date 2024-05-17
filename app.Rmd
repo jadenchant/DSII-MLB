@@ -594,7 +594,7 @@ renderPlot({
   
   ggplot(ROYBoxplot, aes(x= decade, y = as.numeric(filtered_data[[stat_name]])))+
   geom_boxplot()+
-  labs(x = "Decade", y = input$mvp_stat)+
+  labs(x = "Decade", y = input$roy_stat)+
   ggtitle(paste("MLB ROY Statistics:", input$roy_stat, "by Decade"))
   
 })
@@ -773,5 +773,5 @@ renderPlot({
 Conclusion
 ==========================
 
-The Rookie of the Year
+The Rookie of the Year stats have improved slightly since the first Rookie of the Year award was given to Jackie Robinson in 1947. Some of the statistics that have improved are wins above replacement, home runs, RBIs, and slugging percentage. For pitchers the stats have not changed very much since then. 
 
