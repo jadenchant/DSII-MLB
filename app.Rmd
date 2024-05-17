@@ -16,6 +16,8 @@ library(plotly)
 mlb_mvp <- read_csv("data/mlb_mvp.csv") |>
   select(-...1)
 
+mlb_roy <- read_csv("data/mlb_roy.csv")
+
 
 stat_choices <- function(only_pitchers) {
   if (only_pitchers) {
@@ -358,9 +360,28 @@ renderPlot({
 ROY
 ==========================
 
-Column {data-width = 200}
+Inputs {.sidebar}
 -------------------------
 
+
+
+```{r, echo=FALSE}
+inputPanel(
+  uiOutput("stat_selector"),
+  checkboxInput("nl_league", "National League Teams", value = TRUE),
+  checkboxInput("al_league", "American League Teams", value = TRUE),
+  checkboxInput("only_pitchers", "Only Pitchers", value = FALSE),
+)
+
+output$stat_selector <- renderUI({
+  selectInput("mvp_stat", label = "Statistic",
+              choices = stat_choices(input$only_pitchers), selected = isolate(input$mvp_stat))
+})
+```
+
+
+Column {data-width = 100}
+-------------------------
 
 
 
@@ -369,7 +390,7 @@ Column {data-width = 200}
 Cy Young
 ==========================
 
-Column {data-width = 200}
+Column {data-width = 100}
 -------------------------
 
 

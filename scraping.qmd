@@ -135,7 +135,7 @@ ROY_DAT<- ROY_DAT|>
 
 ROY_DAT
 
-write.csv(ROY_DAT, "./data/mlb_roy")
+write.csv(ROY_DAT, "./data/mlb_roy.csv")
 
 
 CYA_DAT<- CYA_DAT|>
@@ -146,7 +146,7 @@ CYA_DAT<- CYA_DAT|>
 
 CYA_DAT
 
-write.csv(CYA_DAT, "./data/mlb_cya")
+write.csv(CYA_DAT, "./data/mlb_cya.csv")
 ```
 
 
