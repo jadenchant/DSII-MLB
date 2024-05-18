@@ -159,5 +159,75 @@ mlb_mvp <- mvp_voting_full |>
 write.csv(mlb_mvp, "./data/mlb_mvp.csv")
 ```
 
+```{r}
+
+#AMERICAN LEAGUE 
+Soto_DAT <- read_html("https://www.baseball-reference.com/players/s/sotoju01.shtml")|>
+  html_nodes("table") %>%
+  .[[2]] %>%  
+  html_table()
+
+so_pred<- Soto_DAT|>
+  filter(PA== "704")
+
+WITT_DAT <- read_html("https://www.baseball-reference.com/players/w/wittbo02.shtml")|>
+  html_nodes("table") %>%
+  .[[2]] %>%  
+  html_table()
+wi_pred<- WITT_DAT|>
+  filter(PA== "698")
+
+TROUT_DAT <- read_html("https://www.baseball-reference.com/players/t/troutmi01.shtml")|>
+  html_nodes("table") %>%
+  .[[2]] %>%  
+  html_table()
+tr_pred<- TROUT_DAT|>
+  filter(PA== "709")
+#NATIONAL LEAGUE
+Shohei_DAT<- read_html("https://www.baseball-reference.com/players/o/ohtansh01.shtml") |>
+  html_nodes("table") %>%
+  .[[2]] %>%  
+  html_table()
+
+oh_pred <- Shohei_DAT|>
+  filter(PA == "668")
+
+BETTS_DAT<- read_html("https://www.baseball-reference.com/players/b/bettsmo01.shtml") |>
+  html_nodes("table") %>%
+  .[[2]] %>%  
+  html_table()
+
+be_pred <- BETTS_DAT|>
+  filter(PA == "738")
+
+ACUNA_DAT<- read_html("https://www.baseball-reference.com/players/a/acunaro01.shtml") |>
+  html_nodes("table") %>%
+  .[[2]] %>%  
+  html_table()
+
+ACUNA_DAT
+
+ac_pred <- ACUNA_DAT|>
+  filter(PA == "731")
+
+ac_pred
+
+all_preds <- bind_rows(so_pred, wi_pred, tr_pred, oh_pred, be_pred, ac_pred)
+
+all_preds<- all_preds|>
+  mutate(Name = case_when(
+    PA == "704" ~ "Soto",
+    PA == "698" ~ "Witt",
+    PA == "709" ~ "Trout",
+    PA == "668" ~ "Ohtani",
+    PA == "738" ~ "Betts",
+    PA == "731" ~ "Acuna Jr",
+    TRUE ~ NA_character_
+  ))
+all_preds <- all_preds %>%
+  select(Name, SLG, AB, R, H, HR, BB, OPS, BA, OBP, RBI, SB)
+
+write.csv(all_preds, "./data/mlb_pred_mvp.csv")
+```
 
 
