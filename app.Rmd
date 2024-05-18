@@ -3,9 +3,10 @@ title: "MLB MVP, ROY, and Cy Young Winners"
 authors: "Henry Gliedman and Jaden Chant"
 output: 
   flexdashboard::flex_dashboard:
-    theme: 
+    theme:
       version: 4
       bootswatch: lux
+    # css: styles.css
 runtime: shiny
 ---
 
@@ -54,8 +55,8 @@ cy_young_choices <- c("Wins Above Replacement","Wins","Losses","Saves","Earned R
 About
 ==========================
 
-Column {data-width=300}
--------------------------
+<div style="padding:30px;">
+
 There are three major awards given out in Major League Baseball each year. The Most Valuable Player Award given to the best player. The Rookie of The Year given to the best first year player, and the Cy Young Award given to the best pitcher. All of these awards are voted on by a council of sports writers labeled the Baseball Writers Association of America, or the BWAA. Each year two players are given each award. One player from the National League, and one player from the American League.     The purpose of this shiny app is to provide an interactive experience for users to view the statistics of these award winners over history. All in an attempt to increase understanding of both how statistical trends have shifted throughout history among the best baseball players, and also how increased importance into statistics over time has altered voting trends, and what writers feel makes up an MVP. Note that definitions of all of our statistics can be found at the bottom of this page.
 
   The MVP award or most valuable player is Major League Baseball's way of recognizing the best overall player in each league in each given season. A player can be awarded up to 420 voting points from the writers of the BWAA. A large majority of the time the MVP award is given to the "most valuable" hitter, but it is possible for a pitcher to win. Play around with the different leagues, and pitching stats to get the most out of our application. 
@@ -84,14 +85,16 @@ Earned Run Average: Number of runs a pitcher has given up divided by their innin
 
 WHIP: Simply the number of Walk, Hits, and Hit By Pitches the pitcher gives up divided by their total innings pitched. 
 
+</div>
+
+
 MVP
 ==========================
-
 
 Inputs {.sidebar}
 -------------------------
 
-
+\
 
 ```{r, echo=FALSE}
 inputPanel(
@@ -403,13 +406,14 @@ renderPlot({
 ```
 
 
+
 ROY
 ==========================
 
 Inputs {.sidebar}
 -------------------------
 
-
+\
 
 ```{r, echo=FALSE}
 inputPanel(
@@ -630,6 +634,9 @@ Cy Young
 
 Inputs {.sidebar}
 -------------------------
+
+\
+
 ```{r, echo=FALSE}
 inputPanel(
   uiOutput("cy_stat_selector"),
@@ -792,8 +799,12 @@ renderPlot({
 
 2024 Prediction
 ==========================
+
 Inputs {.sidebar}
 -------------------------
+
+\
+
 ```{r, echo= FALSE}
 inputPanel(
   selectInput("player", "Select Player", choices = unique(all_preds$Name)),
@@ -847,8 +858,12 @@ ggplot(mvp_data_filtered, aes_string(x= input$pred_stat))+
 Conclusion
 ==========================
 
+<div style="padding:30px;">
+
 The MVP award has changed a lot in the history of baseball. The first change in statistics can be seen almost immediately. The dead ball era ends in 1920 giving way to Babe Ruth and others to start hitting home runs. Since the 1920's total home runs stat has been one of the most important to get MVP recognition. Home runs continue to trend upwards through all of history with the addition of steroids and coaches training players to hit the ball out at a higher clip. Runs scored is also an interesting stat to look at as it is fairly representative of run scoring among baseball as a whole. There are upticks and down ticks in the games history which show MLB's constant effort to control the game in order to keep run scoring at a somewhat constant rate. Another interesting discovery from this data is trends in on base percentage versus trends in base on balls or walks. Looking at the MVP charts On Base Percentage has dropped throughout history. However, the number of walks has trended upwards. That feels not very intuitive because the more walks you draw the higher an On Base Percentage you have. However pitching has gotten so much better in the past century. Some of the slowest throwing arms of today game would be hard throwers in the early 20th century. The development of throwing velocity along with perfecting breaking balls has led to major decreases in the hitters ability to get hits. But at the same time advanced analytics have shown that walks are valuable, and a stat offenses should care about. This "Moneyball" style of play (which actually originated well before the 2000's) has led to increased walk totals. The improvement of pitching along with coaching stressing walks has led to this interesting trend of On Base Percentage dropping while Walks reach all time highs. The uptick in walks among MVP winners, especially recently can also partially be attributed to voters understanding analytics better. Thus valuating players that walk a lot more fairly than before.     
 
 Since Jackie Robinson first won the Rookie of the Year award in 1947, the stats for rookies have seen some notable improvements. One of the standout stats that have improved is Wins Above Replacement (WAR). This metric, which estimates a player's overall contribution to their team, has seen a noticeable uptick among top rookies, reflecting how today's rookies are bringing even more value to their teams. Home runs are another area where we’ve seen growth. Back in the day, hitting a lot of home runs as a rookie was rare, but now it's more common to see rookies making significant contributions right out of the gate. This increase in power is also reflected in the improved slugging percentages we've been seeing. A higher slugging percentage indicates that rookies are not just getting hits, but getting extra-base hits more frequently. RBIs have also seen an upward trend. Modern rookies are driving in more runs, which is a key indicator of their ability to perform under pressure and contribute to their team's success in clutch situations. However, when we shift our focus to pitching, the changes aren’t as dramatic. Rookie pitchers' stats have remained relatively consistent since 1947. This could be due to several factors, including the inherent challenges of pitching at the highest level and perhaps even the way rookie pitchers are managed and developed over time. While there have been fluctuations in specific pitching stats, the overall performance of rookie pitchers hasn't seen the same kind of steady improvement that we’ve observed in hitting stats. However, we may see this start to change with Shohei Ohtani and his incredible pitching and hitting stats. While rookie hitters are increasingly showing their power and overall value early in their careers, rookie pitchers’ stats have remained more stable over the decades. This contrast highlights the different developmental paths and challenges faced by position players and pitchers in Major League Baseball.
 
 Don Newcombe became the first pitcher to win the CY Young award in 1956. The award named after pitcher CY Young who holds the MLB record for career wins, and is considered one of the greatest baseball players to ever live. Partially because of the legacy that Young left, there was a huge importance put into Wins as a stat to get recognition for the award. For a long time the CY Young simply went to the best pitcher in each league that was top 3 in Wins. This trend has changed lately because analytics have proven to the public that wins are an extremely unfair stat. You can pitch 7 innings, give up 1 runs, and then get a loss 1-0. Alternatively you can pitch 5 innings and give up 4 runs but win 5-4, that's a win. Because of this realization, and also because of our grown understanding of rest win totals for cy young winners in particular but pitchers in general have dropped throughout history. Staying with the idea of rest, the number of innings pitched has also gone down over baseball's history. Modern sports medicine has shown that throwing a lot of high impact innings can very quickly destroy your elbow, the best way to mitigate injuries is by limiting innings. Because of this as velocities have increased innings have decreased both league wide, and with top end starters. The same top end starters that could win a Cy Young. Lastly we would like to mention strikeouts. The first major shift was after the mound dropped in 1968 strikeouts plummeted as pitchers adapted to the new mound. Adapt pitching staffs did though, as from 1985 to 2015 strikeout numbers for CY Young winner skyrocketed to all time highs. Strikeouts became a very important statistic to win the Cy Young and it showed. Since the introduction of Statcast and mainstream analytics around 2016 strikeout total with CY Young winners have decreased, but that is simply due to the increased limiting of innings. Top end guys still get strikeouts at the same rate, they just pitch less. Lastly I want to point out one amazing outliar. 1985 Dwight Gooden. In 1985 Gooden was 20 years old pitching for the New York Mets. In that season he posted a 12.2 pitching WAR, the highest we have ever seen with a CY Young winner. This is probably the greatest pitching season ever and he did it at 20. Sadly drug addiction derailed Gooden's career, but it is worth noting that the greatest season ever seen from a pitcher was achieved by someone the age of a sophomore in college.     
+
+</div>
