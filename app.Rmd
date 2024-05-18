@@ -6,7 +6,6 @@ output:
     theme:
       version: 4
       bootswatch: lux
-    # css: styles.css
 runtime: shiny
 ---
 
